@@ -3,10 +3,12 @@
 
 ## 📋 Table of Contents
 1. [🎯 Overview](#-overview)
-2. [🏗️ Architecture & Component Analysis](#-architecture--component-analysis)
-3. [⚙️ Installation & Setup](#-installation--setup)
+2. [🏗️ Architecture & Component Analysis](#%EF%B8%8F-architecture--component-analysis)
+3. [⚙️ Installation & Setup](#%EF%B8%8F-installation--setup)
+4. [📄 License](#-license)
+5. [⚠️ Important Notices & Risk Warnings](#%EF%B8%8F-important-notices--risk-warnings)
 
----
+
 
 ## 🎯 Overview
 
@@ -22,7 +24,7 @@ MEXC⚡ is a complex, production-ready trading bot designed for the MEXC cryptoc
 - **📊 Real-Time Monitoring**: Continuous position tracking with protective order management
 
 
----
+
 
 
 ## 🏗️ Architecture & Component Analysis
@@ -82,7 +84,7 @@ flowchart LR
   -  Credential handling
 
 
----
+
 
 
 
@@ -177,7 +179,53 @@ loguru>=0.7.0
 | `🔐 cryptography` | HMAC authentication for MEXC API |
 | `🌍 python-dotenv` | Environment variable management |
 
----
+
+
+
+## 📄 License
+
+This software is licensed under the GNU General Public License v3.0 (GPLv3). You are free to use, modify, and distribute this software for both personal and commercial purposes, as long as you comply with the terms of the GPLv3 license. This includes preserving the license notice and making the source code of any derivative works available under the same license.
+
+
+
+
+
+
+## ⚠️ Important Notices & Risk Warnings
+
+### Disclaimer
+
+Cryptocurrency trading involves a substantial risk of financial loss. This software is provided **"as is"**, without any warranties or guarantees of performance or profitability.
+By using this software, you acknowledge that you are solely responsible for any actions taken and any outcomes resulting from its use. The developer is not liable for any losses, damages, or legal issues arising from its use. Users are responsible for complying with local regulations and the terms of service of the exchange.
+
+### Security Guidelines
+
+* Never commit API keys to version control.
+* Enable IP whitelisting on your MEXC API keys for added protection.
+
+### API Usage & Limits
+
+* Adhere to MEXC’s API rate limits.
+* Monitor usage to avoid throttling.
+
+### Trading Risk Reminders
+
+* Cryptocurrency trading involves significant financial risk.
+* Always start in dry-run mode to test configurations.
+* Begin with small amounts when going live.
+* Monitor performance regularly.
+* Understand that stop-losses may not always trigger as expected in volatile markets.
+
+
+
+
+
+
+
+
+
+
+
 
 
 
