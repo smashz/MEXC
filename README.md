@@ -24,3 +24,13 @@ MEXC⚡: High-Performance Crypto Trading Bot for MEXC Exchange
    ```bash
    python test_api.py
    ```
+
+3. **Run the script to find tradable pairs**
+
+   Execute the PowerShell script below to generate a `tradable_pairs.txt` file.
+   This file will list all symbols that support **spot trading** on the MEXC exchange.
+
+   ```powershell
+   .\find_tradeables.ps1
+   ```
+
