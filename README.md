@@ -13,14 +13,14 @@ MEXC⚡: High-Performance Crypto Trading Bot for MEXC Exchange
 
 2. **Run the MEXC API Test**
 
-If you're using a virtual environment (e.g., conda), activate it first:
+   If you're using a virtual environment (e.g., conda), activate it first:
+   
+   ```bash
+   conda activate your_environment_name
+   ```
 
-```bash
-conda activate your_environment_name
-```
-
-Then, run the script:
-
-```bash
-python test_api.py
-```
+   Then, run the script:
+   
+   ```bash
+   python test_api.py
+   ```
