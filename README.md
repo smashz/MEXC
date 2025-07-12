@@ -2,8 +2,9 @@
 
 
 ## 📋 Table of Contents
-1. [🎯 Overview](#overview)
-2. [🏗️ Architecture & Component Analysis](#architecture--component-analysis)
+1. [🎯 Overview](#-overview)
+2. [🏗️ Architecture & Component Analysis](#-architecture--component-analysis)
+3. [⚙️ Installation & Setup](#-installation--setup)
 
 ---
 
@@ -86,35 +87,98 @@ flowchart LR
 
 
 
+## ⚙️ Installation & Setup
 
-## Usage
+### 📋 Prerequisites
+- **🐍 Python 3.8+** (recommended: Python 3.9 or higher)
+- **🏦 MEXC Exchange Account** with API access enabled
+- **🔑 Valid API credentials** with trading permissions
+- **💻 Windows/Linux** compatible
 
-1. **Install the required libraries**
+### 💿 Step-by-Step Installation
 
-   ```bash
-   pip install -r requirements.txt
-   ```
+#### 1. Environment Setup
+```bash
+# Create virtual environment (recommended)
+python -m venv mexc_env
+source mexc_env/bin/activate  # Linux
+# or
+mexc_env\Scripts\activate     # Windows
+# or
+conda activate your_environment_name     # If you're using conda
 
-2. **Run the MEXC API Test**
+# Install dependencies
+pip install -r requirements.txt
+```
 
-   If you're using a virtual environment (e.g., conda), activate it first:
-   
-   ```bash
-   conda activate your_environment_name
-   ```
 
-   Then, run the script:
-   
-   ```bash
-   python test_api.py
-   ```
+#### 2. API Configuration
+```bash
+# Copy environment template
+cp env_example.txt .env
 
-3. **Run the script to find tradable pairs**
+# Edit .env with your credentials
+# Required:
+MEXC_API_KEY=your_actual_api_key_here
+MEXC_SECRET_KEY=your_actual_secret_key_here
 
-   Execute the PowerShell script below to generate a `tradable_pairs.txt` file.
-   This file will list all symbols that support **spot trading** on the MEXC exchange.
+# Optional but recommended:
+DRY_RUN=true                    # Start in test mode
+TRADING_SYMBOL=XRPUSDT          # Default trading pair
+TRADING_QUANTITY=2.0          # Default order size (USDT)
+```
 
-   ```powershell
-   .\find_tradeables.ps1
-   ```
+#### 3. Verification
+```bash
+# Test MEXC API
+python test_api.py
+
+# Test API connectivity
+python main.py --action test-permissions
+
+# Validate your trading symbol
+python main.py --action validate --symbol XRPUSDT
+
+# Find tradeable symbols
+python main.py --action symbols --search BTC
+```
+
+Execute the PowerShell script below to generate a `tradable_pairs.txt` file.
+This file will list all symbols that support **spot trading** on the MEXC exchange.
+
+```powershell
+.\find_tradeables.ps1
+```
+
+### 📦 Dependencies Analysis
+
+**Core Dependencies:**
+
+```1:12:requirements.txt
+requests>=2.31.0
+aiohttp>=3.9.0
+asyncio>=3.4.3
+python-dotenv>=1.0.0
+pydantic>=2.5.0
+pytz>=2023.3
+schedule>=1.2.0
+websockets>=12.0
+cryptography>=41.0.0
+pandas>=2.1.0
+numpy>=1.25.0
+loguru>=0.7.0
+```
+
+|  Package |  Purpose |
+|---------|---------|
+| `🌐 aiohttp` | High-performance async HTTP client |
+| `✅ pydantic` | Data validation and configuration management |
+| `📝 loguru` | Advanced logging with rotation |
+| `🔐 cryptography` | HMAC authentication for MEXC API |
+| `🌍 python-dotenv` | Environment variable management |
+
+---
+
+
+
 
