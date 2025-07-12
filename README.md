@@ -6,7 +6,7 @@
 2. [🏗️ Architecture & Component Analysis](#%EF%B8%8F-architecture--component-analysis)
 3. [⚙️ Installation & Setup](#%EF%B8%8F-installation--setup)
 4. [📄 License](#-license)
-5. [⚠️ Important Notices & Risk Warnings](#%EF%B8%8F-important-notices--risk-warnings)
+5. [⚠ Important Notices & Risk Warnings](#-important-notices--risk-warnings)
 
 
 
@@ -191,7 +191,7 @@ This software is licensed under the GNU General Public License v3.0 (GPLv3). You
 
 
 
-## ⚠️ Important Notices & Risk Warnings
+## ⚠ Important Notices & Risk Warnings
 
 ### Disclaimer
 
