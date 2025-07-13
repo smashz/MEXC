@@ -1,6 +1,23 @@
 # MEXC⚡: High-Performance Crypto Trading Bot for MEXC Exchange
 
 
+<!-- [![Maintenance](https://img.shields.io/badge/Status-Maintained-brightgreen.svg)](#) -->
+<!-- [![No Maintenance Intended](https://img.shields.io/badge/Status-No%20Longer%20Maintained-red.svg)](#) -->
+
+[![Trading Bot](https://img.shields.io/badge/🤖-Crypto%20Trading%20Bot-purple)](#)
+[![Maintenance](https://img.shields.io/badge/Status-Maintained-brightgreen.svg)](#)
+[![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=fff)](#)
+[![Python Version](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](#)
+[![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20MacOS%20%7C%20Windows-lightgrey.svg)](#)
+[![Security](https://img.shields.io/badge/Security-API%20Keys%20Required-yellow.svg)](#)
+[![Disclaimer](https://img.shields.io/badge/Disclaimer-Important%20Notices-red.svg)](https://github.com/n-azimi/MEXC?tab=readme-ov-file#-important-notices--risk-warnings)
+[![Exchange](https://img.shields.io/badge/Exchange-MEXC-blue)](https://mexc.com/)
+[![Affiliation](https://img.shields.io/badge/Legal%20Notice-Independent%20%26%20Unaffiliated%20with%20MEXC-important)](#)
+[![Last Commit](https://img.shields.io/github/last-commit/n-azimi/MEXC.svg)](https://github.com/n-azimi/MEXC/commits/main)
+[![License](https://img.shields.io/github/license/n-azimi/MEXC.svg)](LICENSE)
+
+
+
 ## 📋 Table of Contents
 1. [🎯 Overview](#-overview)
 2. [🏗️ Architecture & Component Analysis](#%EF%B8%8F-architecture--component-analysis)
@@ -333,8 +350,7 @@ This software is licensed under the GNU General Public License v3.0 (GPLv3). You
 
 ### Disclaimer
 
-Cryptocurrency trading involves a substantial risk of financial loss. This software is provided **"as is"**, without any warranties or guarantees of performance or profitability.
-By using this software, you acknowledge that you are solely responsible for any actions taken and any outcomes resulting from its use. The developer is not liable for any losses, damages, or legal issues arising from its use. Users are responsible for complying with local regulations and the terms of service of the exchange.
+This project is an independently developed software tool and is not affiliated with, endorsed by, or officially supported by MEXC. It is provided "as is", without any warranties or guarantees of performance or profitability. Cryptocurrency trading involves a substantial risk of financial loss, and by using this software, you acknowledge that you are solely responsible for any actions taken and any outcomes resulting from its use. The developer assumes no liability for any losses, damages, or legal issues that may arise from its use. Users are responsible for complying with local regulations and the terms of service of the exchange.
 
 ### Security Guidelines
 
