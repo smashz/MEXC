@@ -10,7 +10,7 @@
 [![Python Version](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](#)
 [![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20MacOS%20%7C%20Windows-lightgrey.svg)](#)
 [![Security](https://img.shields.io/badge/Security-API%20Keys%20Required-yellow.svg)](#)
-[![Disclaimer](https://img.shields.io/badge/Disclaimer-Important%20Notices-red.svg)](https://github.com/n-azimi/MEXC?tab=readme-ov-file#-important-notices--risk-warnings)
+[![Disclaimer](https://img.shields.io/badge/Disclaimer-Important%20Notices-red.svg)](https://github.com/n-azimi/MEXC?tab=readme-ov-file#%EF%B8%8F-important-notices--risk-warnings)
 [![Exchange](https://img.shields.io/badge/Exchange-MEXC-blue)](https://mexc.com/)
 [![Affiliation](https://img.shields.io/badge/Legal%20Notice-Independent%20%26%20Unaffiliated%20with%20MEXC-important)](#)
 [![Last Commit](https://img.shields.io/github/last-commit/n-azimi/MEXC.svg)](https://github.com/n-azimi/MEXC/commits/main)
