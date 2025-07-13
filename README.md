@@ -52,11 +52,89 @@ MEXC⚡ is a complex, production-ready trading bot designed for the MEXC cryptoc
 The MEXC⚡ trading bot follows a modular, async-first architecture designed for high performance and reliability:
 
 ```mermaid
-flowchart LR
-    main["main.py<br/>Entry Point"] --> engine["TradingEngine<br/>Core Logic"] --> client["MexcClient<br/>API Interface"]
-    main --> config["Config<br/>Management"]
-    engine --> position["Position<br/>Monitoring"]
-    client --> rate["Rate Limiting<br/>& Auth"]
+graph TD
+    %% External Entities on top
+    User((User))
+    MEXC((MEXC Exchange))
+    
+    %% Organize in logical groups using positioning
+    
+    %% Core Components - Center
+    subgraph Core [Core Trading System]
+        TradingBot["TradingBot (main.py)"]
+        TradingEngine[trading_engine.py]
+        MexcClient[mexc_client.py]
+    end
+    
+    %% Entry Points - Left
+    subgraph Entry [Entry Points]
+        RunBot[run_bot.py]
+        Main[main.py]
+    end
+    
+    %% Configuration - Right
+    subgraph Conf [Configuration]
+        EnvFile[(".env")]
+        Config[config.py]
+    end
+    
+    %% Data & Utilities - Bottom
+    subgraph Data [Data & Utilities]
+        RunList[("runlist.txt")]
+        TradeablePairs[("tradeable_pairs.txt")]
+        FindTradeables[find_tradeables.ps1]
+        TestAPI[test_api.py]
+        LogFiles[("logs/*.log")]
+    end
+    
+    %% Core relationships
+    TradingBot --> |"Initializes"| TradingEngine
+    TradingBot --> |"Initializes"| MexcClient
+    TradingEngine --> |"Uses"| MexcClient
+    
+    %% Entry point relationships
+    RunBot --> |"Launches"| Main
+    Main --> |"Creates"| TradingBot
+    
+    %% Configuration relationships
+    EnvFile --> |"Loads Environment Variables"| Config
+    Config --> |"Creates BotConfig"| TradingBot
+    Config --> |"Creates MexcCredentials"| MexcClient
+    Config --> |"Creates TradingParams"| TradingEngine
+    
+    %% Data Store relationships
+    FindTradeables --> |"Generates"| TradeablePairs
+    
+    %% External Connections
+    User --> |"Run"| RunBot
+    User --> |"Defines the runlist"| RunList
+    RunBot --> |"Executes Commands from"| RunList
+    MEXC <--> |"API Requests/Responses"| MexcClient
+    
+    %% Data Flows
+    MexcClient --> |"Market Data"| TradingEngine
+    MexcClient --> |"Order Status"| TradingEngine
+    TradingEngine --> |"Trading Signals"| TradingBot
+    TradingBot --> |"Logs"| LogFiles
+    TradingBot --> |"Status Updates"| User
+    TradeablePairs --> |"Provides Available Pairs"| User
+    TestAPI --> |"API Status"| User
+    
+    %% Key Methods
+    TradingBot --> |"place_buy_order()"| TradingEngine
+    TradingEngine --> |"place_limit_buy_order()"| MexcClient
+    TradingEngine --> |"monitor_positions()"| MexcClient
+    
+    %% Styling
+    classDef external fill:#f96,stroke:#333,stroke-width:2px,stroke-dasharray: 5 5
+    classDef process fill:#9cf,stroke:#333,stroke-width:1px
+    classDef datastore fill:#fc9,stroke:#333,stroke-width:1px,stroke-dasharray: 3 3
+    classDef configStyle fill:#9f9,stroke:#333,stroke-width:1px
+    
+    class User,MEXC external
+    class Main,RunBot,TradingBot,TradingEngine,MexcClient,FindTradeables,TestAPI,Config process
+    class TradeablePairs,LogFiles datastore
+    class EnvFile,RunList configStyle
 ```
 
 
