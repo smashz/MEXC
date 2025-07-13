@@ -4,7 +4,7 @@
 <!-- [![Maintenance](https://img.shields.io/badge/Status-Maintained-brightgreen.svg)](#) -->
 <!-- [![No Maintenance Intended](https://img.shields.io/badge/Status-No%20Longer%20Maintained-red.svg)](#) -->
 
-[![Trading Bot](https://img.shields.io/badge/🤖-Crypto%20Trading%20Bot-purple)]()
+[![Trading Bot](https://img.shields.io/badge/🤖-Crypto%20Trading%20Bot-purple)](#)
 [![Maintenance](https://img.shields.io/badge/Status-Maintained-brightgreen.svg)](#)
 [![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=fff)](#)
 [![Python Version](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](#)
