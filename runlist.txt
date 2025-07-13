@@ -1,0 +1,2 @@
+python main.py --action test-permissions
+python main.py --action symbols --search BTC

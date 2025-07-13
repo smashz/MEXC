@@ -1,12 +1,30 @@
 # MEXC⚡: High-Performance Crypto Trading Bot for MEXC Exchange
 
 
+<!-- [![Maintenance](https://img.shields.io/badge/Status-Maintained-brightgreen.svg)](#) -->
+<!-- [![No Maintenance Intended](https://img.shields.io/badge/Status-No%20Longer%20Maintained-red.svg)](#) -->
+
+[![Trading Bot](https://img.shields.io/badge/🤖-Crypto%20Trading%20Bot-purple)](#)
+[![Maintenance](https://img.shields.io/badge/Status-Maintained-brightgreen.svg)](#)
+[![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=fff)](#)
+[![Python Version](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](#)
+[![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20MacOS%20%7C%20Windows-lightgrey.svg)](#)
+[![Security](https://img.shields.io/badge/Security-API%20Keys%20Required-yellow.svg)](#)
+[![Disclaimer](https://img.shields.io/badge/Disclaimer-Important%20Notices-red.svg)](https://github.com/n-azimi/MEXC?tab=readme-ov-file#-important-notices--risk-warnings)
+[![Exchange](https://img.shields.io/badge/Exchange-MEXC-blue)](https://mexc.com/)
+[![Affiliation](https://img.shields.io/badge/Legal%20Notice-Independent%20%26%20Unaffiliated%20with%20MEXC-important)](#)
+[![Last Commit](https://img.shields.io/github/last-commit/n-azimi/MEXC.svg)](https://github.com/n-azimi/MEXC/commits/main)
+[![License](https://img.shields.io/github/license/n-azimi/MEXC.svg)](LICENSE)
+
+
+
 ## 📋 Table of Contents
 1. [🎯 Overview](#-overview)
 2. [🏗️ Architecture & Component Analysis](#%EF%B8%8F-architecture--component-analysis)
 3. [⚙️ Installation & Setup](#%EF%B8%8F-installation--setup)
-4. [📄 License](#-license)
-5. [⚠ Important Notices & Risk Warnings](#-important-notices--risk-warnings)
+4. [📁 Code Structure & Usage](#-code-structure--usage)
+5. [📄 License](#-license)
+6. [⚠️ Important Notices & Risk Warnings](#%EF%B8%8F-important-notices--risk-warnings)
 
 
 
@@ -182,6 +200,143 @@ loguru>=0.7.0
 
 
 
+## 📁 Code Structure & Usage
+
+**Code Structure:**
+
+```
+📁 MEXC/
+├── 📚 docs/                      # Documentation
+├── 📝 logs/                      # Application logs
+│   └── MEXCL_2025-07-13.log
+├── 🚀 main.py                    # Entry point with core application logic
+├── ⚙️ run_bot.py                 # Bot execution script
+├── ⚡ trading_engine.py          # Core trading logic and strategies
+├── 🔗 mexc_client.py             # MEXC API client implementation
+├── 🔧 config.py                  # Configuration management
+├── 🧪 test_api.py                # API testing utilities
+├── 📋 runlist.txt                # List of commands to run
+├── 📊 tradeable_pairs.txt        # List of available trading pairs
+├── 🔍 find_tradeables.ps1        # PowerShell script to find tradeable pairs
+├── 📦 requirements.txt           # Project dependencies
+├── 🔒 .env                       # Environment variables and API keys
+├── 🌍 env_example.txt            # Environment variable template
+└── 📖 README.md                  # Primary documentation
+```
+
+
+
+**Usage:**
+
+1. **Define your run list**
+
+    Create a file named `runlist.txt` and list the commands you want to run, one per line.
+    Each line should be a valid shell command, such as:
+    
+    ```txt
+    python main.py --action test-permissions
+    python main.py --action symbols --search BTC
+    ```
+    
+    > `runlist.txt` is used to queue commands for execution.
+    
+
+    The following commands are available:
+
+    ```
+    usage: main.py [-h]
+                   [--action {start,buy,sell,status,symbols,validate,test-permissions,find-tradeable,debug-tpsl,test-tpsl-types,bracket,sequential,simple-bracket}]
+                   [--price PRICE]
+                   [--quantity QUANTITY]
+                   [--symbol SYMBOL]
+                   [--search SEARCH]
+                   [--dry-run]
+                   [--config CONFIG]
+                   [--time TIME]
+                   [--timezone TIMEZONE]
+                   [--stop-loss STOP_LOSS]
+                   [--take-profit TAKE_PROFIT]
+    ```
+
+    ```
+    options:
+      -h, --help
+          Show this help message and exit.
+    
+      --action {start,buy,sell,status,symbols,validate,test-permissions,find-tradeable,debug-tpsl,test-tpsl-types,bracket,sequential,simple-bracket}
+          Specify the action the bot should perform:
+            start             Start the trading bot with the current configuration.
+            buy               Place a buy order for the specified symbol.
+            sell              Place a sell order for the specified symbol.
+            status            Show the current bot status or open positions.
+            symbols           List all available trading symbols on MEXC.
+            validate          Validate the current configuration file.
+            test-permissions  Test API permissions for your MEXC account.
+            find-tradeable    List symbols that are currently tradeable.
+            debug-tpsl        Debug take-profit/stop-loss logic.
+            test-tpsl-types   Test various TP/SL order types.
+            bracket           Place a bracket order (entry, take-profit, stop-loss).
+            sequential        Place sequential bracket orders.
+            simple-bracket    Place a simplified bracket order with basic parameters.
+    
+      --price PRICE
+          Specify the price for buy/sell orders. Required for limit orders.
+    
+      --quantity QUANTITY
+          Amount of the asset to buy or sell in the order. Accepts decimal values.
+    
+      --symbol SYMBOL
+          Trading symbol to use for the order (e.g., XRPUSDT). Overrides default symbol in config.
+    
+      --search SEARCH
+          Search term to filter symbols when using the 'symbols' or 'find-tradeable' actions.
+    
+      --dry-run
+          Enable dry run mode: simulate actions without executing real trades on MEXC.
+    
+      --config CONFIG
+          Path to a custom configuration file.
+    
+      --time TIME
+          Schedule order execution at a specific time (format: HH:MM or HH:MM:SS, 24-hour).
+    
+      --timezone TIMEZONE
+          Timezone for scheduled orders (default: America/New_York). Accepts any valid IANA timezone string.
+    
+      --stop-loss STOP_LOSS
+          Set stop-loss price for bracket or sequential orders. Triggers a sell if price drops to this level.
+    
+      --take-profit TAKE_PROFIT
+          Set take-profit price for bracket or sequential orders. Triggers a sell if price rises to this level.
+    ```
+   
+    
+
+3. **Run the bot**
+
+    Start the runner script using:
+    
+    ```bash
+    python run_bot.py
+    ```
+    
+    This script will read each line from `runlist.txt` and execute the commands **sequentially**.
+    
+    * Each command will **only start after the previous one finishes**.
+    * To run commands in **parallel**, simply open multiple terminal windows and run `python run_bot.py` in each one using different `runlist.txt` files (or selectively modify the file).
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## 📄 License
 
 This software is licensed under the GNU General Public License v3.0 (GPLv3). You are free to use, modify, and distribute this software for both personal and commercial purposes, as long as you comply with the terms of the GPLv3 license. This includes preserving the license notice and making the source code of any derivative works available under the same license.
@@ -191,12 +346,11 @@ This software is licensed under the GNU General Public License v3.0 (GPLv3). You
 
 
 
-## ⚠ Important Notices & Risk Warnings
+## ⚠️ Important Notices & Risk Warnings
 
 ### Disclaimer
 
-Cryptocurrency trading involves a substantial risk of financial loss. This software is provided **"as is"**, without any warranties or guarantees of performance or profitability.
-By using this software, you acknowledge that you are solely responsible for any actions taken and any outcomes resulting from its use. The developer is not liable for any losses, damages, or legal issues arising from its use. Users are responsible for complying with local regulations and the terms of service of the exchange.
+This project is an independently developed software tool and is not affiliated with, endorsed by, or officially supported by MEXC. It is provided "as is", without any warranties or guarantees of performance or profitability. Cryptocurrency trading involves a substantial risk of financial loss, and by using this software, you acknowledge that you are solely responsible for any actions taken and any outcomes resulting from its use. The developer assumes no liability for any losses, damages, or legal issues that may arise from its use. Users are responsible for complying with local regulations and the terms of service of the exchange.
 
 ### Security Guidelines
 
