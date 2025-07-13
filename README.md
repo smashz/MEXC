@@ -5,7 +5,7 @@
 <!-- [![No Maintenance Intended](https://img.shields.io/badge/Status-No%20Longer%20Maintained-red.svg)](#) -->
 
 [![Trading Bot](https://img.shields.io/badge/🤖-Crypto%20Trading%20Bot-purple)](#)
-[![Maintenance](https://img.shields.io/badge/Status-Maintained-brightgreen.svg)](#)
+[![No Maintenance Intended](https://img.shields.io/badge/Status-No%20Longer%20Maintained-red.svg)](#)
 [![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=fff)](#)
 [![Python Version](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](#)
 [![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20MacOS%20%7C%20Windows-lightgrey.svg)](#)
@@ -15,6 +15,7 @@
 [![Affiliation](https://img.shields.io/badge/Legal%20Notice-Independent%20%26%20Unaffiliated%20with%20MEXC-important)](#)
 [![Last Commit](https://img.shields.io/github/last-commit/n-azimi/MEXC.svg)](https://github.com/n-azimi/MEXC/commits/main)
 [![License](https://img.shields.io/github/license/n-azimi/MEXC.svg)](LICENSE)
+[![Github Sponsors](https://img.shields.io/badge/GitHub%20Sponsors-30363D?&logo=GitHub-Sponsors&logoColor=EA4AAA)](SUPPORT.md)
 
 
 
@@ -25,6 +26,7 @@
 4. [📁 Code Structure & Usage](#-code-structure--usage)
 5. [📄 License](#-license)
 6. [⚠️ Important Notices & Risk Warnings](#%EF%B8%8F-important-notices--risk-warnings)
+7. [💖 Support & Donations](#-support--donations)
 
 
 
@@ -406,15 +408,6 @@ loguru>=0.7.0
 
 
 
-
-
-
-
-
-
-
-
-
 ## 📄 License
 
 This software is licensed under the GNU General Public License v3.0 (GPLv3). You are free to use, modify, and distribute this software for both personal and commercial purposes, as long as you comply with the terms of the GPLv3 license. This includes preserving the license notice and making the source code of any derivative works available under the same license.
@@ -452,9 +445,13 @@ This project is an independently developed software tool and is not affiliated w
 
 
 
+## 💖 Support & Donations
 
+> **Note:** This project is no longer actively maintained. However, the code remains available for both personal and commercial use, as long as you comply with the terms of the GPLv3 license.
 
+If you found this software helpful or it added value to your work, you’re welcome to support the developer. Your support is appreciated, even small contributions help acknowledge the work that went into this software.
 
+[![Github Sponsors](https://img.shields.io/badge/GitHub%20Sponsors-30363D?&logo=GitHub-Sponsors&logoColor=EA4AAA)](SUPPORT.md)
 
 
 
