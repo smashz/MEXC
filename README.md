@@ -23,7 +23,7 @@
 1. [🎯 Overview](#-overview)
 2. [🏗️ Architecture & Component Analysis](#%EF%B8%8F-architecture--component-analysis)
 3. [⚙️ Installation & Setup](#%EF%B8%8F-installation--setup)
-4. [🔧 Configuration Management](#-configuration-management)
+4. [🛠️ Configuration Management](#%EF%B8%8F-configuration-management)
 5. [📁 Code Structure & Usage](#-code-structure--usage)
 6. [📄 License](#-license)
 7. [🔔 Important Notices & Risk Warnings](#-important-notices--risk-warnings)
@@ -282,7 +282,7 @@ loguru>=0.7.0
 
 
 
-## 🔧 Configuration Management
+## 🛠️ Configuration Management
 
 ### 🌍 Environment Variables Reference
 
