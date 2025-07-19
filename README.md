@@ -23,10 +23,11 @@
 1. [🎯 Overview](#-overview)
 2. [🏗️ Architecture & Component Analysis](#%EF%B8%8F-architecture--component-analysis)
 3. [⚙️ Installation & Setup](#%EF%B8%8F-installation--setup)
-4. [📁 Code Structure & Usage](#-code-structure--usage)
-5. [📄 License](#-license)
-6. [⚠️ Important Notices & Risk Warnings](#%EF%B8%8F-important-notices--risk-warnings)
-7. [💖 Support & Donations](#-support--donations)
+4. [🛠️ Configuration Management](#%EF%B8%8F-configuration-management)
+5. [📁 Code Structure & Usage](#-code-structure--usage)
+6. [📄 License](#-license)
+7. [🔔 Important Notices & Risk Warnings](#-important-notices--risk-warnings)
+8. [💖 Support & Donations](#-support--donations)
 
 
 
@@ -280,6 +281,56 @@ loguru>=0.7.0
 
 
 
+
+## 🛠️ Configuration Management
+
+### 🌍 Environment Variables Reference
+
+#### **API Credentials** (Required)
+```bash
+MEXC_API_KEY=your_api_key
+MEXC_SECRET_KEY=your_secret_key
+MEXC_PASSPHRASE=your_passphrase_if_required  # Optional passphrase
+```
+
+#### **Trading Parameters**
+```bash
+TRADING_SYMBOL=XRPUSDT             # Trading pair symbol
+TRADING_QUANTITY=2.0               # Order quantity
+QUANTITY_IS_USDT=true              # true: quantity in USDT, false: base currency
+STOP_LOSS_PERCENTAGE=2.0           # Stop-loss (0.1% to 50%)
+TAKE_PROFIT_PERCENTAGE=5.0         # Take-profit (0.1% to 100%, optional)
+```
+
+#### **Risk Management**
+```bash
+DRY_RUN=true                       # Test mode without real trades
+RATE_LIMIT_RPS=10.0                # API rate limit (requests/second)
+LOG_LEVEL=INFO                     # Logging level (INFO, DEBUG, etc.)
+```
+
+#### **Trading Windows** (Optional - 24/7 if not set)
+```bash
+TRADING_START_TIME=06:00           # Trading window start (HH:MM:SS)
+TRADING_END_TIME=18:00             # Trading window end (HH:MM:SS)
+TRADING_TIMEZONE=UTC               # Timezone (e.g., America/New_York)
+```
+
+### ✅ Configuration Validation
+
+MEXC⚡ uses Pydantic models for configuration validation:
+
+- **MexcCredentials**: API authentication details
+- **TradingParams**: Trading parameters with built-in validation
+  - Quantity must be > 0
+  - Stop-loss: 0.1% to 50%
+  - Take-profit: 0.1% to 100%
+- **TimeWindow**: Trading schedule configuration
+- **BotConfig**: Main configuration container
+
+
+
+
 ## 📁 Code Structure & Usage
 
 **Code Structure:**
@@ -417,7 +468,7 @@ This software is licensed under the GNU General Public License v3.0 (GPLv3). You
 
 
 
-## ⚠️ Important Notices & Risk Warnings
+## 🔔 Important Notices & Risk Warnings
 
 ### Disclaimer
 
