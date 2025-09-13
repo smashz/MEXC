@@ -5,6 +5,21 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# AI / UI defaults (can be overridden via environment variables)
+PREDICTION_LENGTH = int(os.getenv("PREDICTION_LENGTH", "64"))
+CONFIDENCE_THRESHOLD = float(os.getenv("CONFIDENCE_THRESHOLD", "0.6"))
+MAX_HISTORICAL_DATA = int(os.getenv("MAX_HISTORICAL_DATA", "512"))
+
+# UI / strategy defaults
+FAST_MA_PERIOD = int(os.getenv("FAST_MA_PERIOD", "5"))
+SLOW_MA_PERIOD = int(os.getenv("SLOW_MA_PERIOD", "20"))
+TIMEFRAME = os.getenv("TIMEFRAME", "1m")
+INTERVAL = int(os.getenv("UI_INTERVAL", "30"))
+TRADE_AMOUNT = float(os.getenv("TRADE_AMOUNT", "1.0"))
+STOP_LOSS_PCT = float(os.getenv("STOP_LOSS_PERCENTAGE", "2.0")) / 100.0
+TAKE_PROFIT_PCT = float(os.getenv("TAKE_PROFIT_PERCENTAGE", "5.0")) / 100.0
+MAX_TRADES_PER_DAY = int(os.getenv("MAX_TRADES_PER_DAY", "10"))
+
 class MexcCredentials(BaseModel):
     api_key: str = Field(..., description="MEXC API Key")
     secret_key: str = Field(..., description="MEXC Secret Key")
