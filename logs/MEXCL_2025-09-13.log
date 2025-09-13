@@ -1,0 +1,146 @@
+2025-09-13 17:06:28 | INFO     | __main__:initialize:129 - Trading bot initialized successfully
+2025-09-13 17:06:28 | WARNING  | __main__:initialize:132 - Bot is running in DRY RUN mode - no real trades will be executed
+2025-09-13 17:06:29 | INFO     | mexc_client:test_api_permissions:241 - ✅ API connectivity successful
+2025-09-13 17:06:29 | INFO     | mexc_client:test_api_permissions:252 - ✅ Account access successful
+2025-09-13 17:06:29 | INFO     | mexc_client:test_api_permissions:253 - Account type: SPOT
+2025-09-13 17:06:29 | INFO     | mexc_client:test_api_permissions:264 - ✅ Trading permissions enabled
+2025-09-13 17:06:29 | INFO     | mexc_client:test_api_permissions:278 - USDT balance: 2.87144030328545
+2025-09-13 17:06:29 | INFO     | __main__:initialize:129 - Trading bot initialized successfully
+2025-09-13 17:06:29 | WARNING  | __main__:initialize:132 - Bot is running in DRY RUN mode - no real trades will be executed
+2025-09-13 17:06:30 | INFO     | mexc_client:test_connectivity:220 - API connectivity test successful
+2025-09-13 17:06:30 | INFO     | mexc_client:get_exchange_info:130 - Exchange info returned 1 symbols
+2025-09-13 17:06:30 | INFO     | mexc_client:validate_symbol:204 - Symbol XRPUSDT validation: status=1, spotTradingAllowed=True
+2025-09-13 17:06:30 | INFO     | __main__:initialize:129 - Trading bot initialized successfully
+2025-09-13 17:06:30 | WARNING  | __main__:initialize:132 - Bot is running in DRY RUN mode - no real trades will be executed
+2025-09-13 17:06:31 | INFO     | mexc_client:test_connectivity:220 - API connectivity test successful
+2025-09-13 17:06:32 | INFO     | mexc_client:get_exchange_info:130 - Exchange info returned 2173 symbols
+2025-09-13 17:06:32 | INFO     | mexc_client:get_all_symbols:176 - Found 1824 tradeable symbols (with spot trading enabled)
+2025-09-13 17:06:32 | INFO     | mexc_client:search_symbols:188 - Found 26 symbols matching 'BTC'
+2025-09-13 17:07:03 | INFO     | __main__:initialize:129 - Trading bot initialized successfully
+2025-09-13 17:07:03 | WARNING  | __main__:initialize:132 - Bot is running in DRY RUN mode - no real trades will be executed
+2025-09-13 17:07:04 | INFO     | mexc_client:test_api_permissions:241 - ✅ API connectivity successful
+2025-09-13 17:07:04 | INFO     | mexc_client:test_api_permissions:252 - ✅ Account access successful
+2025-09-13 17:07:04 | INFO     | mexc_client:test_api_permissions:253 - Account type: SPOT
+2025-09-13 17:07:04 | INFO     | mexc_client:test_api_permissions:264 - ✅ Trading permissions enabled
+2025-09-13 17:07:04 | INFO     | mexc_client:test_api_permissions:278 - USDT balance: 2.87144030328545
+2025-09-13 17:07:21 | INFO     | __main__:initialize:129 - Trading bot initialized successfully
+2025-09-13 17:07:21 | WARNING  | __main__:initialize:132 - Bot is running in DRY RUN mode - no real trades will be executed
+2025-09-13 17:07:22 | INFO     | mexc_client:test_connectivity:220 - API connectivity test successful
+2025-09-13 17:07:22 | INFO     | mexc_client:get_exchange_info:130 - Exchange info returned 1 symbols
+2025-09-13 17:07:22 | INFO     | mexc_client:validate_symbol:204 - Symbol XRPUSDT validation: status=1, spotTradingAllowed=True
+2025-09-13 17:09:17 | INFO     | __main__:initialize:129 - Trading bot initialized successfully
+2025-09-13 17:09:17 | WARNING  | __main__:initialize:132 - Bot is running in DRY RUN mode - no real trades will be executed
+2025-09-13 17:09:18 | INFO     | mexc_client:test_api_permissions:241 - ✅ API connectivity successful
+2025-09-13 17:09:18 | INFO     | mexc_client:test_api_permissions:252 - ✅ Account access successful
+2025-09-13 17:09:18 | INFO     | mexc_client:test_api_permissions:253 - Account type: SPOT
+2025-09-13 17:09:18 | INFO     | mexc_client:test_api_permissions:264 - ✅ Trading permissions enabled
+2025-09-13 17:09:18 | INFO     | mexc_client:test_api_permissions:278 - USDT balance: 2.87144030328545
+2025-09-13 17:09:18 | INFO     | __main__:initialize:129 - Trading bot initialized successfully
+2025-09-13 17:09:18 | WARNING  | __main__:initialize:132 - Bot is running in DRY RUN mode - no real trades will be executed
+2025-09-13 17:09:19 | INFO     | mexc_client:test_connectivity:220 - API connectivity test successful
+2025-09-13 17:09:20 | INFO     | mexc_client:get_exchange_info:130 - Exchange info returned 2173 symbols
+2025-09-13 17:09:20 | INFO     | mexc_client:get_all_symbols:176 - Found 1824 tradeable symbols (with spot trading enabled)
+2025-09-13 17:09:20 | INFO     | mexc_client:search_symbols:188 - Found 26 symbols matching 'BTC'
+2025-09-13 17:10:24 | INFO     | __main__:initialize:129 - Trading bot initialized successfully
+2025-09-13 17:10:24 | WARNING  | __main__:initialize:132 - Bot is running in DRY RUN mode - no real trades will be executed
+2025-09-13 17:10:24 | INFO     | mexc_client:test_api_permissions:241 - ✅ API connectivity successful
+2025-09-13 17:10:24 | INFO     | mexc_client:test_api_permissions:252 - ✅ Account access successful
+2025-09-13 17:10:24 | INFO     | mexc_client:test_api_permissions:253 - Account type: SPOT
+2025-09-13 17:10:24 | INFO     | mexc_client:test_api_permissions:264 - ✅ Trading permissions enabled
+2025-09-13 17:10:24 | INFO     | mexc_client:test_api_permissions:278 - USDT balance: 2.87144030328545
+2025-09-13 17:10:24 | INFO     | __main__:initialize:129 - Trading bot initialized successfully
+2025-09-13 17:10:24 | WARNING  | __main__:initialize:132 - Bot is running in DRY RUN mode - no real trades will be executed
+2025-09-13 17:10:25 | INFO     | mexc_client:test_connectivity:220 - API connectivity test successful
+2025-09-13 17:10:25 | INFO     | mexc_client:get_exchange_info:130 - Exchange info returned 2173 symbols
+2025-09-13 17:10:25 | INFO     | mexc_client:get_all_symbols:176 - Found 1824 tradeable symbols (with spot trading enabled)
+2025-09-13 17:10:25 | INFO     | mexc_client:search_symbols:188 - Found 26 symbols matching 'BTC'
+2025-09-13 17:11:29 | INFO     | __main__:initialize:129 - Trading bot initialized successfully
+2025-09-13 17:11:29 | WARNING  | __main__:initialize:132 - Bot is running in DRY RUN mode - no real trades will be executed
+2025-09-13 17:11:29 | INFO     | mexc_client:test_api_permissions:241 - ✅ API connectivity successful
+2025-09-13 17:11:29 | INFO     | mexc_client:test_api_permissions:252 - ✅ Account access successful
+2025-09-13 17:11:29 | INFO     | mexc_client:test_api_permissions:253 - Account type: SPOT
+2025-09-13 17:11:29 | INFO     | mexc_client:test_api_permissions:264 - ✅ Trading permissions enabled
+2025-09-13 17:11:29 | INFO     | mexc_client:test_api_permissions:278 - USDT balance: 2.87144030328545
+2025-09-13 17:11:30 | INFO     | __main__:initialize:129 - Trading bot initialized successfully
+2025-09-13 17:11:30 | WARNING  | __main__:initialize:132 - Bot is running in DRY RUN mode - no real trades will be executed
+2025-09-13 17:11:30 | INFO     | mexc_client:test_connectivity:220 - API connectivity test successful
+2025-09-13 17:11:31 | INFO     | mexc_client:get_exchange_info:130 - Exchange info returned 2173 symbols
+2025-09-13 17:11:31 | INFO     | mexc_client:get_all_symbols:176 - Found 1824 tradeable symbols (with spot trading enabled)
+2025-09-13 17:11:31 | INFO     | mexc_client:search_symbols:188 - Found 26 symbols matching 'BTC'
+2025-09-13 17:12:19 | INFO     | main:initialize:129 - Trading bot initialized successfully
+2025-09-13 17:12:19 | WARNING  | main:initialize:132 - Bot is running in DRY RUN mode - no real trades will be executed
+2025-09-13 17:12:19 | INFO     | main:start:144 - Starting trading bot...
+2025-09-13 17:12:19 | INFO     | trading_engine:monitor_positions:327 - Starting position monitoring...
+2025-09-13 17:16:25 | INFO     | main:start:165 - Trading bot stopped
+2025-09-13 17:16:25 | INFO     | __main__:initialize:129 - Trading bot initialized successfully
+2025-09-13 17:16:25 | WARNING  | __main__:initialize:132 - Bot is running in DRY RUN mode - no real trades will be executed
+2025-09-13 17:16:26 | INFO     | mexc_client:test_api_permissions:241 - ✅ API connectivity successful
+2025-09-13 17:16:26 | INFO     | mexc_client:test_api_permissions:252 - ✅ Account access successful
+2025-09-13 17:16:26 | INFO     | mexc_client:test_api_permissions:253 - Account type: SPOT
+2025-09-13 17:16:26 | INFO     | mexc_client:test_api_permissions:264 - ✅ Trading permissions enabled
+2025-09-13 17:16:26 | INFO     | mexc_client:test_api_permissions:278 - USDT balance: 2.87144030328545
+2025-09-13 17:16:27 | INFO     | __main__:initialize:129 - Trading bot initialized successfully
+2025-09-13 17:16:27 | WARNING  | __main__:initialize:132 - Bot is running in DRY RUN mode - no real trades will be executed
+2025-09-13 17:16:27 | INFO     | mexc_client:test_api_permissions:241 - ✅ API connectivity successful
+2025-09-13 17:16:28 | INFO     | mexc_client:test_api_permissions:252 - ✅ Account access successful
+2025-09-13 17:16:28 | INFO     | mexc_client:test_api_permissions:253 - Account type: SPOT
+2025-09-13 17:16:28 | INFO     | mexc_client:test_api_permissions:264 - ✅ Trading permissions enabled
+2025-09-13 17:16:28 | INFO     | mexc_client:test_api_permissions:278 - USDT balance: 2.87144030328545
+2025-09-13 17:16:28 | INFO     | __main__:initialize:129 - Trading bot initialized successfully
+2025-09-13 17:16:28 | WARNING  | __main__:initialize:132 - Bot is running in DRY RUN mode - no real trades will be executed
+2025-09-13 17:16:28 | INFO     | mexc_client:test_connectivity:220 - API connectivity test successful
+2025-09-13 17:16:29 | INFO     | mexc_client:get_exchange_info:130 - Exchange info returned 2173 symbols
+2025-09-13 17:16:29 | INFO     | mexc_client:get_all_symbols:176 - Found 1824 tradeable symbols (with spot trading enabled)
+2025-09-13 17:16:29 | INFO     | mexc_client:search_symbols:188 - Found 26 symbols matching 'BTC'
+2025-09-13 17:20:02 | INFO     | main:initialize:129 - Trading bot initialized successfully
+2025-09-13 17:20:02 | WARNING  | main:initialize:132 - Bot is running in DRY RUN mode - no real trades will be executed
+2025-09-13 17:20:02 | INFO     | main:start:144 - Starting trading bot...
+2025-09-13 17:20:02 | INFO     | trading_engine:monitor_positions:327 - Starting position monitoring...
+2025-09-13 17:20:20 | INFO     | main:start:165 - Trading bot stopped
+2025-09-13 17:20:20 | INFO     | __main__:initialize:129 - Trading bot initialized successfully
+2025-09-13 17:20:20 | WARNING  | __main__:initialize:132 - Bot is running in DRY RUN mode - no real trades will be executed
+2025-09-13 17:20:21 | INFO     | mexc_client:test_api_permissions:241 - ✅ API connectivity successful
+2025-09-13 17:20:22 | INFO     | mexc_client:test_api_permissions:252 - ✅ Account access successful
+2025-09-13 17:20:22 | INFO     | mexc_client:test_api_permissions:253 - Account type: SPOT
+2025-09-13 17:20:22 | INFO     | mexc_client:test_api_permissions:264 - ✅ Trading permissions enabled
+2025-09-13 17:20:22 | INFO     | mexc_client:test_api_permissions:278 - USDT balance: 2.87144030328545
+2025-09-13 17:20:22 | INFO     | __main__:initialize:129 - Trading bot initialized successfully
+2025-09-13 17:20:22 | WARNING  | __main__:initialize:132 - Bot is running in DRY RUN mode - no real trades will be executed
+2025-09-13 17:20:22 | INFO     | mexc_client:test_connectivity:220 - API connectivity test successful
+2025-09-13 17:20:23 | INFO     | mexc_client:get_exchange_info:130 - Exchange info returned 2173 symbols
+2025-09-13 17:20:23 | INFO     | mexc_client:get_all_symbols:176 - Found 1824 tradeable symbols (with spot trading enabled)
+2025-09-13 17:20:23 | INFO     | mexc_client:search_symbols:188 - Found 26 symbols matching 'BTC'
+2025-09-13 17:21:34 | INFO     | __main__:initialize:129 - Trading bot initialized successfully
+2025-09-13 17:21:34 | WARNING  | __main__:initialize:132 - Bot is running in DRY RUN mode - no real trades will be executed
+2025-09-13 17:21:34 | INFO     | mexc_client:test_api_permissions:241 - ✅ API connectivity successful
+2025-09-13 17:21:34 | INFO     | mexc_client:test_api_permissions:252 - ✅ Account access successful
+2025-09-13 17:21:34 | INFO     | mexc_client:test_api_permissions:253 - Account type: SPOT
+2025-09-13 17:21:34 | INFO     | mexc_client:test_api_permissions:264 - ✅ Trading permissions enabled
+2025-09-13 17:21:34 | INFO     | mexc_client:test_api_permissions:278 - USDT balance: 2.87144030328545
+2025-09-13 17:21:57 | INFO     | __main__:initialize:129 - Trading bot initialized successfully
+2025-09-13 17:21:57 | WARNING  | __main__:initialize:132 - Bot is running in DRY RUN mode - no real trades will be executed
+2025-09-13 17:21:58 | INFO     | mexc_client:test_api_permissions:241 - ✅ API connectivity successful
+2025-09-13 17:21:58 | INFO     | mexc_client:test_api_permissions:252 - ✅ Account access successful
+2025-09-13 17:21:58 | INFO     | mexc_client:test_api_permissions:253 - Account type: SPOT
+2025-09-13 17:21:58 | INFO     | mexc_client:test_api_permissions:264 - ✅ Trading permissions enabled
+2025-09-13 17:21:58 | INFO     | mexc_client:test_api_permissions:278 - USDT balance: 2.87144030328545
+2025-09-13 17:23:04 | INFO     | __main__:initialize:129 - Trading bot initialized successfully
+2025-09-13 17:23:04 | WARNING  | __main__:initialize:132 - Bot is running in DRY RUN mode - no real trades will be executed
+2025-09-13 17:23:04 | INFO     | __main__:start:144 - Starting trading bot...
+2025-09-13 17:23:04 | INFO     | trading_engine:monitor_positions:327 - Starting position monitoring...
+2025-09-13 17:24:42 | INFO     | __main__:start:165 - Trading bot stopped
+2025-09-13 17:24:44 | INFO     | __main__:initialize:129 - Trading bot initialized successfully
+2025-09-13 17:24:44 | WARNING  | __main__:initialize:132 - Bot is running in DRY RUN mode - no real trades will be executed
+2025-09-13 17:24:44 | INFO     | __main__:start:144 - Starting trading bot...
+2025-09-13 17:24:44 | INFO     | trading_engine:monitor_positions:327 - Starting position monitoring...
+2025-09-13 17:24:49 | INFO     | __main__:start:165 - Trading bot stopped
+2025-09-13 17:25:12 | INFO     | __main__:initialize:129 - Trading bot initialized successfully
+2025-09-13 17:25:12 | WARNING  | __main__:initialize:132 - Bot is running in DRY RUN mode - no real trades will be executed
+2025-09-13 17:25:12 | INFO     | __main__:start:144 - Starting trading bot...
+2025-09-13 17:25:12 | INFO     | trading_engine:monitor_positions:327 - Starting position monitoring...
+2025-09-13 17:25:15 | INFO     | __main__:start:165 - Trading bot stopped
+2025-09-13 17:28:27 | INFO     | __main__:initialize:129 - Trading bot initialized successfully
+2025-09-13 17:28:27 | WARNING  | __main__:initialize:132 - Bot is running in DRY RUN mode - no real trades will be executed
+2025-09-13 17:28:27 | INFO     | __main__:start:144 - Starting trading bot...
+2025-09-13 17:28:27 | INFO     | trading_engine:monitor_positions:327 - Starting position monitoring...
+2025-09-13 17:57:15 | INFO     | __main__:start:165 - Trading bot stopped
