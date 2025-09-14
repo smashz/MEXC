@@ -1,0 +1,38 @@
+    def _print_headless_status(self, current_price: float, prediction_info: Dict[str, Any]):
+        """Print status updates in headless mode"""
+        direction = prediction_info.get('direction', 'NEUTRAL')
+        confidence = prediction_info.get('confidence', 0.0)
+        prediction = prediction_info.get('prediction')
+        
+        # Create status line with ANSI colors
+        status = "\033[1m\033[36m" + HEADER + "\033[0m"  # Cyan header
+        status += " | " + ("\033[32mLIVE" if not self.engine.config.dry_run else "\033[33mDRY RUN") + "\033[0m"
+        
+        # Price info
+        status += f" | Price: \033[1m${current_price:.4f}\033[0m"
+        if prediction and current_price > 0:  # Avoid division by zero
+            try:
+                change = ((prediction - current_price) / current_price) * 100
+                status += f" → ${prediction:.4f} ({change:+.2f}%)"
+            except (ZeroDivisionError, ValueError):
+                status += f" → ${prediction:.4f}"
+            
+        # Trading info
+        status += f" | {direction}"
+        status += f" ({confidence:.1%})"
+        
+        # Print main status line
+        print(status + "\033[K")  # Clear to end of line
+        
+        # Trading metrics on next line
+        metrics = (
+            f"Trades: {self.engine.daily_trades}/{self.engine.config.trading_params.max_orders_per_day}"
+            f" | Win/Loss: {self.engine.win_count}/{self.engine.loss_count}"
+        )
+        
+        # Profit in green/red
+        profit_color = "\033[32m" if self.engine.total_profit >= 0 else "\033[31m"
+        metrics += f" | Profit: {profit_color}${self.engine.total_profit:.2f}\033[0m"
+        
+        print(metrics + "\033[K")  # Clear to end of line
+        print("-" * 80 + "\033[K")  # Separator line

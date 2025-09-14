@@ -1,1127 +1,868 @@
 #!/usr/bin/env python3
-
-import os
-import sys
-import pytz
 import asyncio
+import sys
+import os
+import time
+import curses
 import argparse
-from typing import Optional
-from datetime import datetime, time as time_obj
+from typing import Optional, Dict, Any, List
+from datetime import datetime
+import logging_config  # Initialize logging
 from loguru import logger
 from config import load_config, BotConfig
 from mexc_client import MexcClient
 from trading_engine import TradingEngine
 
-# Fix Windows Unicode encoding issues
-if sys.platform == "win32":
-    # Set UTF-8 encoding for stdout and stderr on Windows
-    import codecs
-    sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'replace')
-    sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'replace')
-    
-    # Set environment variable for UTF-8 encoding
-    os.environ['PYTHONIOENCODING'] = 'utf-8'
+# Constants for UI
+HEADER = "MEXC⚡ Trading Bot"
+MIN_TERMINAL_WIDTH = 80
+MIN_TERMINAL_HEIGHT = 24
 
-async def wait_until_time(target_time_str: str, timezone_str: str = "America/New_York"):
-    """Wait until a specific time in the given timezone"""
-    try:
-        # Parse the target time (format: "HH:MM" or "HH:MM:SS")
-        if len(target_time_str.split(':')) == 2:
-            target_time_str += ":00"  # Add seconds if not provided
+class TradingBotUI:
+    def __init__(self, engine: TradingEngine, headless: bool = False):
+        self.engine = engine
+        self.headless = headless
+        self.stdscr = None
+        self._running = False
+        self._curses_failed = False
+        self._retry_count = 0
+        self.MAX_RETRIES = 3
+        self._last_update = datetime.now()
+        self.status = "Initializing..."
+        self.paused = False
+        self._update_interval = getattr(engine.config.trading_params, 'ui_update_interval', 1.0)
+        self._last_check = {}  # Track last check times for different components
+        self._last_env_mtime = os.path.getmtime('.env')  # Track .env file modification time
+        self._env_check_interval = 1.0  # Check for .env changes every second
         
-        target_time = datetime.strptime(target_time_str, "%H:%M:%S").time()
+        # Ensure engine is properly initialized
+        if not hasattr(engine, 'client') or not engine.client:
+            logger.error("Trading engine client not initialized!")
+            raise RuntimeError("Trading engine client not initialized")
+            
+        if not hasattr(engine, 'config'):
+            logger.error("Trading engine config not initialized!")
+            raise RuntimeError("Trading engine config not initialized")
+            
+        # Set initial status
+        self.status = "Waiting for market data..."
+            
+        # Colors for different states
+        self.COLORS = {
+            'green': 1,
+            'red': 2,
+            'yellow': 3,
+            'cyan': 4,
+            'white': 5
+        }
+
+    async def _run_strategy_updates(self):
+        """Background task to update the strategy and UI"""
+        next_env_check = 0  # Track when to check .env changes
         
-        # Get timezone
-        tz = pytz.timezone(timezone_str)
-        
-        # Get current time in the target timezone
-        now = datetime.now(tz)
-        current_date = now.date()
-        
-        # Create target datetime for today
-        target_datetime = datetime.combine(current_date, target_time)
-        target_datetime = tz.localize(target_datetime)
-        
-        # If target time has already passed today, schedule for tomorrow
-        if target_datetime <= now:
-            target_datetime = target_datetime.replace(day=current_date.day + 1)
-            target_datetime = tz.localize(target_datetime.replace(tzinfo=None))
-        
-        # Calculate wait time
-        wait_seconds = (target_datetime - now).total_seconds()
-        
-        print(f"⏰ Scheduling order for {target_datetime.strftime('%Y-%m-%d %H:%M:%S %Z')}")
-        print(f"🕐 Current time: {now.strftime('%Y-%m-%d %H:%M:%S %Z')}")
-        print(f"⏳ Waiting {wait_seconds:.0f} seconds ({wait_seconds/60:.1f} minutes)...")
-        
-        # Wait until target time
-        if wait_seconds > 0:
-            # Show countdown for the last 10 seconds
-            if wait_seconds <= 10:
-                for i in range(int(wait_seconds), 0, -1):
-                    print(f"⏰ Executing in {i} seconds...")
-                    await asyncio.sleep(1)
-            else:
-                # For longer waits, show periodic updates
-                while wait_seconds > 10:
-                    await asyncio.sleep(min(60, wait_seconds - 10))  # Check every minute or until 10 seconds left
-                    current_time = datetime.now(tz)
-                    remaining = (target_datetime - current_time).total_seconds()
-                    if remaining <= 10:
-                        break
-                    print(f"⏳ {remaining/60:.1f} minutes remaining until execution...")
-                    wait_seconds = remaining
+        while self._running:
+            try:
+                current_time = time.time()
                 
-                # Final countdown
-                final_wait = (target_datetime - datetime.now(tz)).total_seconds()
-                if final_wait > 0:
-                    for i in range(int(final_wait), 0, -1):
-                        print(f"⏰ Executing in {i} seconds...")
-                        await asyncio.sleep(1)
-        
-        print(f"▶️ Executing order at {datetime.now(tz).strftime('%H:%M:%S %Z')}!")
-        
-    except ValueError as e:
-        raise ValueError(f"Invalid time format. Use HH:MM or HH:MM:SS format. Error: {e}")
-    except Exception as e:
-        raise Exception(f"Error scheduling order: {e}")
-
-class TradingBot:
-    """Main trading bot orchestrator"""
+                # Check for config changes periodically
+                if current_time >= next_env_check:
+                    if await self._check_config_changes():
+                        logger.info("Configuration updated, refreshing UI...")
+                        # Reset state after config change
+                        state = await self._get_strategy_state()
+                        await self._update_display(state['current_price'], state['prediction_info'])
+                    next_env_check = current_time + self._env_check_interval
+                
+                # Run strategy update
+                await self.engine.update_strategy()
+                
+                # Get latest strategy state
+                state = await self._get_strategy_state()
+                
+                # Update UI with latest price info
+                if self.headless:
+                    await self._print_headless_status(state['current_price'], state['prediction_info'])
+                else:
+                    await self._update_display(state['current_price'], state['prediction_info'])
+                    
+                # Update at half the configured interval to ensure fresh data
+                await asyncio.sleep(self.engine.config.ai_config.update_interval / 2)
+                
+            except Exception as e:
+                logger.error(f"Error in strategy update: {e}")
+                await asyncio.sleep(5)
     
-    def __init__(self, config: BotConfig):
-        self.config = config
-        self.client: Optional[MexcClient] = None
-        self.engine: Optional[TradingEngine] = None
-        self.running = False
-        
-    async def initialize(self):
-        """Initialize bot components"""
+    def _init_curses(self):
+        """Initialize curses interface"""
+        if self._curses_failed:
+            self.headless = True
+            return False
+            
+        # Check if we're in a proper terminal
+        if not sys.stdout.isatty():
+            logger.warning("Not running in a terminal, falling back to headless mode")
+            self.headless = True
+            return False
+            
         try:
-            # Setup logging
-            logger.remove()
-            logger.add(
-                sys.stderr,
-                level=self.config.log_level,
-                format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
-            )
-            logger.add(
-                "logs/MEXCL_{time:YYYY-MM-DD}.log",
-                rotation="1 day",
-                retention="30 days",
-                level=self.config.log_level,
-                format="{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {name}:{function}:{line} - {message}"
-            )
+            # Try to initialize curses
+            self.stdscr = curses.initscr()
+            curses.start_color()
+            curses.use_default_colors()
             
-            # Validate configuration
-            if not self.config.credentials.api_key or not self.config.credentials.secret_key:
-                raise ValueError("MEXC API credentials not configured. Please set MEXC_API_KEY and MEXC_SECRET_KEY environment variables.")
+            # Initialize color pairs
+            curses.init_pair(self.COLORS['green'], curses.COLOR_GREEN, -1)
+            curses.init_pair(self.COLORS['red'], curses.COLOR_RED, -1)
+            curses.init_pair(self.COLORS['yellow'], curses.COLOR_YELLOW, -1)
+            curses.init_pair(self.COLORS['cyan'], curses.COLOR_CYAN, -1)
+            curses.init_pair(self.COLORS['white'], curses.COLOR_WHITE, -1)
             
-            # Initialize MEXC client
-            self.client = MexcClient(
-                credentials=self.config.credentials,
-                rate_limit_rps=self.config.rate_limit_requests_per_second
-            )
+            # Configure terminal
+            curses.noecho()  # Don't echo keypresses
+            curses.cbreak()  # React to keys instantly
+            curses.curs_set(0)  # Hide cursor
+            self.stdscr.keypad(True)  # Enable keypad mode
+            self.stdscr.clear()
+            self.stdscr.refresh()
             
-            # Initialize trading engine
-            self.engine = TradingEngine(self.config, self.client)
+            # Verify terminal size
+            max_y, max_x = self.stdscr.getmaxyx()
+            if max_y < MIN_TERMINAL_HEIGHT or max_x < MIN_TERMINAL_WIDTH:
+                logger.error(f"Terminal too small - needs at least {MIN_TERMINAL_WIDTH}x{MIN_TERMINAL_HEIGHT} chars")
+                self._cleanup_curses()
+                self._curses_failed = True
+                return False
             
-            logger.info("Trading bot initialized successfully")
-            
-            if self.config.dry_run:
-                logger.warning("Bot is running in DRY RUN mode - no real trades will be executed")
+            return True
             
         except Exception as e:
-            logger.error(f"Failed to initialize bot: {str(e)}")
-            raise
-    
-    async def start(self):
-        """Start the trading bot"""
-        if not self.client or not self.engine:
-            await self.initialize()
-        
-        self.running = True
-        logger.info("Starting trading bot...")
-        
-        async with self.client:
-            # Start position monitoring task
-            monitor_task = asyncio.create_task(self.engine.monitor_positions())
-            
+            logger.error(f"Failed to initialize curses: {e}")
+            self._curses_failed = True
+            return False
+
+    def _cleanup_curses(self):
+        """Clean up curses interface"""
+        if not self.headless and curses and self.stdscr:
             try:
-                # Main bot loop
-                while self.running:
-                    await asyncio.sleep(1)
-                    
-            except KeyboardInterrupt:
-                logger.info("Received shutdown signal")
-                self.running = False
-            finally:
-                monitor_task.cancel()
+                # Reset the terminal state
+                self.stdscr.keypad(False)
+                curses.nocbreak()
+                curses.echo()
+                
+                # Show cursor again
                 try:
-                    await monitor_task
-                except asyncio.CancelledError:
+                    curses.curs_set(1)
+                except:
+                    pass
+                    
+                # Clear screen before ending
+                try:
+                    self.stdscr.clear()
+                    self.stdscr.refresh()
+                except:
+                    pass
+                    
+                # Finally end curses mode
+                curses.endwin()
+                self.stdscr = None
+            except Exception as e:
+                logger.error(f"Error cleaning up curses: {e}")
+                # Try one last time to restore terminal
+                try:
+                    curses.endwin()
+                except:
                     pass
                 
-                logger.info("Trading bot stopped")
-    
-    async def stop(self):
-        """Stop the trading bot"""
-        self.running = False
-        logger.info("Stopping trading bot...")
-    
-    async def place_buy_order(self, price: float, quantity: Optional[float] = None):
-        """Place a buy order"""
-        if not self.engine:
-            await self.initialize()
-        
-        async with self.client:
-            # Validate symbol first
-            symbol = self.config.trading_params.symbol
-            print(f"🔍 Validating trading symbol: {symbol}")
+    def _get_color(self, signal: str) -> int:
+        """Get the color pair number for a given signal"""
+        if signal in ['BUY', 'LONG']:
+            return curses.color_pair(self.COLORS['green'])
+        elif signal in ['SELL', 'SHORT']:
+            return curses.color_pair(self.COLORS['red'])
+        elif signal == 'NEUTRAL':
+            return curses.color_pair(self.COLORS['yellow'])
+        else:
+            return curses.color_pair(self.COLORS['white'])
+
+    async def _update_display(self, current_price: float, prediction_info: Dict[str, Any]):
+        """Update the display (curses or headless)"""
+        if self.headless:
+            await self._print_headless_status(current_price, prediction_info)
+            return
             
-            is_valid = await self.client.validate_symbol(symbol)
-            if not is_valid:
-                print(f"❌ Symbol '{symbol}' is not valid or not supported for trading")
-                print("💡 Suggestions:")
-                print("  • Check the symbol format (should be like BTCUSDT, ETHUSDT)")
-                print("  • Use --symbol flag to override (e.g., --symbol BTCUSDT)")
-                print("  • Run 'python main.py --action symbols --search BTC' to find valid symbols")
-                return None
-            
-            print(f"✅ Symbol '{symbol}' is valid for trading")
-            
-            result = await self.engine.place_limit_buy_order(price, quantity)
-            if result:
-                logger.info(f"Buy order result: {result}")
-                return result
-            else:
-                logger.warning("Buy order was not placed")
-                return None
-    
-    async def place_sell_order(self, price: float, quantity: Optional[float] = None):
-        """Place a sell order"""
-        if not self.engine:
-            await self.initialize()
-        
-        async with self.client:
-            # Validate symbol first
-            symbol = self.config.trading_params.symbol
-            print(f"🔍 Validating trading symbol: {symbol}")
-            
-            is_valid = await self.client.validate_symbol(symbol)
-            if not is_valid:
-                print(f"❌ Symbol '{symbol}' is not valid or not supported for API trading")
-                print("💡 Suggestions:")
-                print("  • Check the symbol format (should be like BTCUSDT, ETHUSDT)")
-                print("  • Use --symbol flag to override (e.g., --symbol BTCUSDT)")
-                print("  • Run 'python main.py --action symbols --search BTC' to find valid symbols")
-                return None
-            
-            print(f"✅ Symbol '{symbol}' is valid for trading")
-            
-            result = await self.engine.place_limit_sell_order(price, quantity)
-            if result:
-                logger.info(f"Sell order result: {result}")
-                return result
-            else:
-                logger.warning("Sell order was not placed")
-                return None
-    
-    async def get_status(self):
-        """Get bot and account status"""
-        if not self.engine:
-            await self.initialize()
-        
-        async with self.client:
-            summary = await self.engine.get_account_summary()
-            
-            # Add bot-specific status
-            summary.update({
-                "bot_running": self.running,
-                "dry_run_mode": self.config.dry_run,
-                "trading_symbol": self.config.trading_params.symbol,
-                "stop_loss_percentage": self.config.trading_params.stop_loss_percentage,
-                "trading_windows": [
-                    {
-                        "start": window.start_time,
-                        "end": window.end_time,
-                        "timezone": window.timezone
-                    }
-                    for window in self.config.trading_windows
-                ]
-            })
-            
-            return summary
-    
-    async def search_symbols(self, search_term: Optional[str] = None):
-        """Search for available trading symbols"""
-        if not self.client:
-            await self.initialize()
-        
-        async with self.client:
-            # Test connectivity first
-            print("🔗 Testing API connectivity...")
-            connectivity = await self.client.test_connectivity()
-            if not connectivity:
-                print("❌ API connectivity test failed. Please check your internet connection and API credentials.")
+        try:
+            if not self.stdscr:
                 return
-            
-            print("✅ API connectivity successful")
-            
-            # Test server time
-            try:
-                server_time = await self.client.get_server_time()
-                print(f"🕒 Server time: {server_time.get('serverTime', 'Unknown')}")
-            except Exception as e:
-                print(f"⚠️  Could not get server time: {e}")
-            
-            if search_term:
-                print(f"\n🔍 Searching for symbols containing '{search_term}'...")
-                symbols = await self.client.search_symbols(search_term)
-                print(f"🔍 Symbols containing '{search_term}':")
-                if symbols:
-                    for i, symbol in enumerate(symbols[:20], 1):  # Show first 20 results
-                        print(f"  {i:2d}. {symbol}")
-                    if len(symbols) > 20:
-                        print(f"  ... and {len(symbols) - 20} more")
-                else:
-                    print(f"  No symbols found containing '{search_term}'")
-                    
-                    # If no results, suggest alternatives
-                    print("\n💡 Troubleshooting suggestions:")
-                    print("  • Try a different search term (e.g., BTC, ETH, USDT)")
-                    print("  • Check if the symbol exists on MEXC exchange")
-                    print("  • Verify your API credentials and permissions")
-            else:
-                print("\n📊 Getting all available symbols...")
-                # Get all symbols first
-                all_symbols = await self.client.get_all_symbols()
                 
-                if not all_symbols:
-                    print("❌ No symbols found. This could indicate:")
-                    print("  • API authentication issues")
-                    print("  • Network connectivity problems")
-                    print("  • Regional restrictions")
-                    print("  • MEXC API maintenance")
-                    
-                    # Try to get exchange info directly for debugging
+            # Clear screen and get dimensions
+            self.stdscr.clear()
+            height, width = self.stdscr.getmaxyx()
+            
+            # Header
+            try:
+                self.stdscr.addstr(0, 0, "🚀 MEXC AI Trading Bot", curses.A_BOLD)
+                self.stdscr.addstr(1, 0, "=" * min(80, width-1))
+            except:
+                # Fall back to ASCII if unicode fails
+                self.stdscr.addstr(0, 0, "MEXC AI Trading Bot", curses.A_BOLD)
+                self.stdscr.addstr(1, 0, "=" * min(80, width-1))
+            
+            # Status section
+            status = "PAUSED" if self.paused else self.status
+            status_color = curses.color_pair(self.COLORS['yellow']) if self.paused else \
+                          curses.color_pair(self.COLORS['green']) if status == "RUNNING" else \
+                          curses.color_pair(self.COLORS['cyan'])
+            
+            try:
+                self.stdscr.addstr(2, 0, f"Status: {'⏸️ ' if self.paused else '🟢 '}{status}", status_color)
+            except:
+                self.stdscr.addstr(2, 0, f"Status: {'|| ' if self.paused else '> '}{status}", status_color)
+                
+            self.stdscr.addstr(3, 0, f"Last Update: {self._last_update.strftime('%H:%M:%S')}")
+            
+            # User Balance
+            try:
+                self.stdscr.addstr(5, 0, "👤 User Balance:", curses.A_BOLD)
+            except:
+                self.stdscr.addstr(5, 0, "User Balance:", curses.A_BOLD)
+                
+            # Get symbol parts (e.g., BTC from BTC_USDT or APEX from APEX_USDT)
+            symbol = self.engine.config.trading_params.symbol
+            # Handle both underscore and no-underscore formats
+            base_asset = symbol.split('_')[0] if '_' in symbol else symbol.replace('USDT', '').replace('_', '')
+            # Also handle lower/uppercase in symbol name
+            base_asset = base_asset.upper()
+            
+            try:
+                balances = await self.engine.client.get_account_balance()
+                
+                # Display USDT balance
+                usdt_balance = balances.get('USDT', {'free': 0, 'locked': 0, 'total': 0})
+                self.stdscr.addstr(6, 2, f"USDT Balance: ${usdt_balance['total']:.2f}")
+                self.stdscr.addstr(7, 4, f"Available: ${usdt_balance['free']:.2f}")
+                self.stdscr.addstr(8, 4, f"Locked: ${usdt_balance['locked']:.2f}")
+                
+                # Display base asset balance
+                base_balance = balances.get(base_asset, {'free': 0, 'locked': 0, 'total': 0})
+                self.stdscr.addstr(9, 2, f"{base_asset} Balance: {base_balance['total']:.8f}")
+                self.stdscr.addstr(10, 4, f"Available: {base_balance['free']:.8f}")
+                self.stdscr.addstr(11, 4, f"Locked: {base_balance['locked']:.8f}")
+            except Exception as e:
+                self.stdscr.addstr(6, 2, f"Error fetching balances: {str(e)}")
+            
+            # Market Data
+            try:
+                self.stdscr.addstr(13, 0, "📊 Market Data:", curses.A_BOLD)
+            except:
+                self.stdscr.addstr(13, 0, "Market Data:", curses.A_BOLD)
+                
+            symbol = self.engine.config.trading_params.symbol
+            timeframe = self.engine.config.trading_params.timeframe
+            
+            self.stdscr.addstr(6, 2, f"Symbol: {symbol}")
+            self.stdscr.addstr(7, 2, f"Current Price: ${current_price:.4f}")
+            self.stdscr.addstr(8, 2, f"Timeframe: {timeframe}")
+            
+            # MA Indicators
+            try:
+                if hasattr(self.engine, 'fast_ma') and hasattr(self.engine, 'slow_ma'):
+                    # Get and validate MA values
                     try:
-                        print("\n🔧 Attempting direct exchange info call...")
-                        exchange_info = await self.client.get_exchange_info()
-                        symbols_raw = exchange_info.get('symbols', [])
-                        print(f"📋 Raw exchange info returned {len(symbols_raw)} symbols")
+                        fast_ma = self.engine.fast_ma[-1] if len(self.engine.fast_ma) > 0 else None
+                        slow_ma = self.engine.slow_ma[-1] if len(self.engine.slow_ma) > 0 else None
                         
-                        if symbols_raw:
-                            print("📝 Sample symbols from raw data:")
-                            for i, symbol in enumerate(symbols_raw[:5]):
-                                print(f"  {i+1}. {symbol.get('symbol', 'Unknown')} - Status: {symbol.get('status', 'Unknown')}")
+                        if fast_ma is None or slow_ma is None:
+                            if not hasattr(self, '_last_ma_warning'):
+                                logger.warning("MA data not available yet. Waiting for enough price history...")
+                                logger.info(f"MA Arrays - Fast: {len(self.engine.fast_ma)}, Slow: {len(self.engine.slow_ma)}")
+                                self._last_ma_warning = True
+                            fast_ma = self._last_values.get('fast_ma', 0)
+                            slow_ma = self._last_values.get('slow_ma', 0)
+                        else:
+                            self._last_values['fast_ma'] = fast_ma
+                            self._last_values['slow_ma'] = slow_ma
+                            self._last_ma_warning = False
                         
+                        ma_signal = "BUY" if fast_ma > slow_ma else "SELL" if fast_ma < slow_ma else "NEUTRAL"
+                        ma_color = self._get_color(ma_signal)
+                        
+                        self.stdscr.addstr(9, 2, f"Fast MA: ${fast_ma:.4f}")
+                        self.stdscr.addstr(10, 2, f"Slow MA: ${slow_ma:.4f}")
+                        self.stdscr.addstr(11, 2, f"MA Signal: {ma_signal}", ma_color)
                     except Exception as e:
-                        print(f"❌ Direct exchange info call failed: {e}")
-                    
-                    return
-                
-                # Filter for USDT pairs
-                usdt_symbols = [s for s in all_symbols if s.endswith('USDT')]
-                
-                # Find popular pairs
-                popular_pairs = []
-                for symbol in usdt_symbols:
-                    base = symbol.replace('USDT', '')
-                    if base in ["BTC", "ETH", "ADA", "XRP", "DOT", "LTC", "BCH", "LINK", "UNI", "DOGE"]:
-                        popular_pairs.append(symbol)
-                
-                print("\n💰 Popular USDT Trading Pairs:")
-                if popular_pairs:
-                    for symbol in popular_pairs:
-                        print(f"  • {symbol}")
-                else:
-                    print("  No popular pairs found")
-                    
-                # Show first 10 USDT pairs if any exist
-                if usdt_symbols:
-                    print("\n📈 Available USDT pairs:")
-                    for symbol in usdt_symbols[:10]:
-                        print(f"  • {symbol}")
-                    if len(usdt_symbols) > 10:
-                        print(f"  ... and {len(usdt_symbols) - 10} more")
-                
-                print(f"\n📊 Symbol Statistics:")
-                print(f"  • Total symbols: {len(all_symbols)}")
-                print(f"  • USDT pairs: {len(usdt_symbols)}")
-                
-                # Show breakdown by quote currency
-                quote_breakdown = {}
-                for symbol in all_symbols:
-                    for quote in ['USDT', 'BTC', 'ETH', 'BNB', 'USDC']:
-                        if symbol.endswith(quote):
-                            quote_breakdown[quote] = quote_breakdown.get(quote, 0) + 1
-                            break
-                
-                if quote_breakdown:
-                    print(f"  • Quote currency breakdown:")
-                    for quote, count in sorted(quote_breakdown.items(), key=lambda x: x[1], reverse=True):
-                        print(f"    - {quote}: {count} pairs")
-                
-                print("\n💡 Use --search to find specific symbols (e.g., --search BTC)")
-
-    async def validate_current_symbol(self):
-        """Validate the currently configured trading symbol"""
-        if not self.client:
-            await self.initialize()
-        
-        async with self.client:
-            symbol = self.config.trading_params.symbol
-            print(f"🔍 Checking configured symbol: {symbol}")
-            
-            # Test connectivity first
-            connectivity = await self.client.test_connectivity()
-            if not connectivity:
-                print("❌ API connectivity test failed")
-                return False
-            
-            # Validate symbol
-            is_valid = await self.client.validate_symbol(symbol)
-            if is_valid:
-                print(f"✅ Symbol '{symbol}' is valid for trading")
-                
-                # Get current price to confirm it's working
-                try:
-                    ticker = await self.client.get_ticker_price(symbol)
-                    price = ticker.get('price', 'Unknown')
-                    print(f"💰 Current price: {price}")
-                    return True
-                except Exception as e:
-                    print(f"⚠️  Could not get price for {symbol}: {e}")
-                    return False
-            else:
-                print(f"❌ Symbol '{symbol}' is not valid or not supported for trading")
-                
-                # Suggest alternatives
-                print("\n💡 Suggestions:")
-                print("  • Use one of these popular symbols:")
-                popular_symbols = ["BTCUSDT", "ETHUSDT", "ADAUSDT", "XRPUSDT", "DOTUSDT"]
-                for sym in popular_symbols:
-                    print(f"    - {sym}")
-                print("  • Update your .env file with TRADING_SYMBOL=BTCUSDT")
-                print("  • Or use --symbol flag when running commands")
-                
-                return False
-
-    async def test_permissions(self):
-        """Test API key permissions and account status"""
-        if not self.client:
-            await self.initialize()
-        
-        async with self.client:
-            print("🔐 Testing API Key Permissions...\n")
-            
-            permissions = await self.client.test_api_permissions()
-            
-            print("📋 Permission Test Results:")
-            print(f"  🔗 Connectivity: {'✅' if permissions['connectivity'] else '❌'}")
-            print(f"  👤 Account Access: {'✅' if permissions['account_access'] else '❌'}")
-            print(f"  💱 Trading Enabled: {'✅' if permissions['trading_enabled'] else '❌'}")
-            print(f"  🏷️  Account Type: {permissions['account_type']}")
-            print(f"  📊 Trading Status: {permissions['trading_status']}")
-            
-            if permissions['error_details']:
-                print("\n❌ Issues Found:")
-                for error in permissions['error_details']:
-                    print(f"  • {error}")
-            
-            if not permissions['trading_enabled']:
-                print("\n🚨 Trading is disabled! Possible reasons:")
-                print("  • API key created without trading permissions")
-                print("  • Account not fully verified")
-                print("  • Account restricted or suspended")
-                print("  • Wrong API endpoint (testnet vs mainnet)")
-                print("\n💡 Solutions:")
-                print("  • Check MEXC account verification status")
-                print("  • Recreate API key with trading permissions enabled")
-                print("  • Contact MEXC support if account is restricted")
-            
-            return permissions
-
-    async def find_tradeable_symbols(self):
-        """Find symbols that allow spot trading"""
-        if not self.client:
-            await self.initialize()
-        
-        async with self.client:
-            print("🔍 Finding symbols that allow spot trading...\n")
-            
-            # Test connectivity first
-            connectivity = await self.client.test_connectivity()
-            if not connectivity:
-                print("❌ API connectivity test failed")
-                return
-            
-            # Get all tradeable USDT pairs (remove limit to get all)
-            tradeable_pairs = await self.client.get_tradeable_usdt_pairs(10000)  # Large number to get all pairs
-            
-            if not tradeable_pairs:
-                print("❌ No tradeable USDT pairs found!")
-                print("This could indicate an API or account issue.")
-                return
-            
-            print(f"✅ Found {len(tradeable_pairs)} tradeable USDT pairs:\n")
-            
-            # Show popular trading pairs first
-            popular_bases = ['BTC', 'ETH', 'ADA', 'XRP', 'DOT', 'LTC', 'BCH', 'LINK', 'UNI', 'DOGE']
-            popular_found = []
-            other_pairs = []
-            
-            for pair in tradeable_pairs:
-                base = pair['baseAsset']
-                if base in popular_bases:
-                    popular_found.append(pair)
-                else:
-                    other_pairs.append(pair)
-            
-            if popular_found:
-                print("🌟 Popular Tradeable Pairs:")
-                for pair in popular_found:
-                    symbol = pair['symbol']
-                    base = pair['baseAsset']
-                    max_amount = pair['maxQuoteAmount']
-                    print(f"  ✅ {symbol} ({base}/USDT) - Max: ${max_amount} USDT")
-                
-                # Suggest the first popular one
-                first_popular = popular_found[0]['symbol']
-            
-            if other_pairs and len(other_pairs) > 0:
-                print(f"\n📈 All Other Available Pairs:")
-                for i, pair in enumerate(other_pairs, 1):  # Show all other pairs
-                    symbol = pair['symbol']
-                    base = pair['baseAsset']
-                    max_amount = pair['maxQuoteAmount']
-                    print(f"  {i:3d}. {symbol} ({base}/USDT) - Max: ${max_amount} USDT")
-            
-            print(f"\n📊 Total Summary:")
-            print(f"  • Popular pairs found: {len(popular_found)}")
-            print(f"  • Other pairs found: {len(other_pairs)}")
-            print(f"  • Total tradeable pairs: {len(tradeable_pairs)}")
-            
-            # Test one of the symbols
-            if popular_found:
-                test_symbol = popular_found[0]['symbol']
-                print(f"\n🧪 Testing symbol validation for {test_symbol}:")
-                is_valid = await self.client.validate_symbol(test_symbol)
-                if is_valid:
-                    print(f"✅ {test_symbol} passes validation - ready for trading!")
-                else:
-                    print(f"❌ {test_symbol} failed validation")
-            
-            return tradeable_pairs
-
-    async def debug_tpsl_support(self):
-        """Debug TP/SL support for current symbol"""
-        if not self.client:
-            await self.initialize()
-        
-        async with self.client:
-            symbol = self.config.trading_params.symbol
-            print(f"🔍 Debugging TP/SL support for {symbol}...")
-            
-            # Check TP/SL capabilities
-            tpsl_info = await self.client.check_symbol_tpsl_support(symbol)
-            
-            if "error" in tpsl_info:
-                print(f"❌ Error checking TP/SL support: {tpsl_info['error']}")
-                return
-            
-            print(f"\n📊 TP/SL Analysis for {symbol}:")
-            print(f"  📈 Status: {tpsl_info['status']}")
-            print(f"  💱 Spot Trading: {'✅' if tpsl_info['spotTradingAllowed'] else '❌'}")
-            print(f"  📋 All Order Types: {', '.join(tpsl_info['orderTypes'])}")
-            print(f"  🎯 TP/SL Order Types: {', '.join(tpsl_info['tpsl_order_types'])}")
-            
-            # Check current open orders to see if any have TP/SL
-            try:
-                open_orders = await self.client.get_open_orders(symbol)
-                print(f"\n📝 Current Open Orders: {len(open_orders)}")
-                
-                for order in open_orders:
-                    order_id = order.get('orderId', 'Unknown')
-                    order_type = order.get('type', 'Unknown')
-                    side = order.get('side', 'Unknown')
-                    price = order.get('price', 'Unknown')
-                    stop_price = order.get('stopPrice', None)
-                    
-                    print(f"  📄 Order {order_id}: {order_type} {side} @ {price}")
-                    if stop_price:
-                        print(f"    🛑 Stop Price: {stop_price}")
-                    else:
-                        print(f"    ⚠️  No stop price found")
-                        
+                        logger.error(f"Error processing MA data: {e}")
+                        self.stdscr.addstr(9, 2, "MA Data: Initializing...")
             except Exception as e:
-                print(f"❌ Error checking open orders: {e}")
+                logger.error(f"Error displaying MA indicators: {e}")
             
-            return tpsl_info
-
-    async def test_tpsl_order_types(self):
-        """Test different TP/SL order type variations to find what works"""
-        if not self.client:
-            await self.initialize()
-        
-        async with self.client:
-            symbol = self.config.trading_params.symbol
-            print(f"🧪 Testing TP/SL order type variations for {symbol}...")
-            
-            # Test parameters
-            test_quantity = 1.0
-            test_price = 1.00
-            test_stop_price = 0.95
-            
-            print(f"📋 Test parameters:")
-            print(f"  Symbol: {symbol}")
-            print(f"  Side: BUY")
-            print(f"  Quantity: {test_quantity}")
-            print(f"  Price: ${test_price}")
-            print(f"  Stop Price: ${test_stop_price}")
-            print(f"\n🔍 Testing different order type variations...\n")
-            
-            results = await self.client.test_tpsl_order_types(
-                symbol, 'BUY', test_quantity, test_price, test_stop_price
-            )
-            
-            print(f"📊 Test Results for {symbol}:")
-            print(f"  🎯 Successful Method: {results.get('successful_method', 'None found')}")
-            print(f"  📝 Methods Tested: {len(results.get('tested_methods', []))}")
-            
-            if results.get('successful_method'):
-                print(f"\n✅ SUCCESS! Found working TP/SL method: {results['successful_method']}")
+            # Trading Info
+            try:
+                self.stdscr.addstr(13, 0, "💼 Trading Status:", curses.A_BOLD)
+            except:
+                self.stdscr.addstr(13, 0, "Trading Status:", curses.A_BOLD)
                 
-                # Show the successful parameters
-                for test in results['tested_methods']:
-                    if test['method'] == results['successful_method']:
-                        print(f"🔧 Working parameters:")
-                        for key, value in test['params'].items():
-                            print(f"  {key}: {value}")
-                        break
+            mode = "DRY RUN" if self.engine.config.trading_params.dry_run else "LIVE TRADING"
+            mode_color = curses.color_pair(self.COLORS['yellow']) if mode == "DRY RUN" else curses.color_pair(self.COLORS['red'])
+            self.stdscr.addstr(14, 2, f"Mode: {mode}", mode_color)
+            
+            # Show trade counts and parameters
+            trades = f"{self.engine.daily_trades}/{self.engine.config.trading_params.max_orders_per_day}"
+            self.stdscr.addstr(15, 2, f"Trades Today: {trades}")
+            
+            # Trading Parameters
+            if hasattr(self.engine.config.trading_params, 'trade_amount'):
+                self.stdscr.addstr(16, 2, f"Trade Amount: ${self.engine.config.trading_params.trade_amount:.2f}")
+            if hasattr(self.engine.config.trading_params, 'stop_loss_pct'):
+                self.stdscr.addstr(17, 2, f"Stop Loss: {self.engine.config.trading_params.stop_loss_pct:.1f}%")
+            if hasattr(self.engine.config.trading_params, 'take_profit_pct'):
+                self.stdscr.addstr(18, 2, f"Take Profit: {self.engine.config.trading_params.take_profit_pct:.1f}%")
+            
+            # AI Predictions
+            try:
+                self.stdscr.addstr(20, 0, "🤖 AI Analysis:", curses.A_BOLD)
+            except:
+                self.stdscr.addstr(20, 0, "AI Analysis:", curses.A_BOLD)
+                
+            if prediction_info:
+                direction = prediction_info.get('direction', 'NEUTRAL')
+                confidence = prediction_info.get('confidence', 0.0)
+                signal_color = self._get_color(direction)
+                self.stdscr.addstr(21, 2, f"Signal: {direction}", signal_color)
+                self.stdscr.addstr(22, 2, f"Confidence: {confidence*100:.1f}%")
+                
+                if 'predicted_price' in prediction_info:
+                    pred_price = prediction_info['predicted_price']
+                    change = (pred_price - current_price) / current_price
+                    change_color = curses.color_pair(self.COLORS['green']) if change > 0 else \
+                                 curses.color_pair(self.COLORS['red'])
+                    self.stdscr.addstr(23, 2, f"Target: ${pred_price:.4f}")
+                    self.stdscr.addstr(24, 2, f"Change: {change*100:+.2f}%", change_color)
+                
+                # Add model info if available
+                model_name = prediction_info.get('model_name', '')
+                prediction_length = prediction_info.get('prediction_length', '')
+                confidence_threshold = prediction_info.get('confidence_threshold', '')
+                
+                if model_name:
+                    self.stdscr.addstr(25, 2, f"Model: {model_name}")
+                if prediction_length:
+                    self.stdscr.addstr(26, 2, f"Prediction Length: {prediction_length}")
+                if confidence_threshold:
+                    self.stdscr.addstr(27, 2, f"Conf. Threshold: {confidence_threshold:.1f}")
             else:
-                print(f"\n❌ No working TP/SL order types found for {symbol}")
+                self.stdscr.addstr(14, 2, "No predictions available")
             
-            print(f"\n📋 Detailed Results:")
-            for test in results.get('tested_methods', []):
-                status_icon = "✅" if test['status'] == 'success' else "❌"
-                print(f"  {status_icon} {test['method']}: {test['status']}")
-                if test.get('error'):
-                    print(f"    Error: {test['error'][:100]}...")
-            
-            if results.get('error_details'):
-                print(f"\n⚠️  Common errors:")
-                for error in results['error_details'][:3]:  # Show first 3 errors
-                    print(f"  • {error[:80]}...")
-            
-            return results
-
-    async def place_bracket_buy_order(self, price: float, quantity: Optional[float] = None, stop_loss_pct: float = 5.0, take_profit_pct: float = 10.0):
-        """Place a bracket buy order with both stop-loss and take-profit"""
-        if not self.engine:
-            await self.initialize()
-        
-        async with self.client:
-            # Validate symbol first
-            symbol = self.config.trading_params.symbol
-            print(f"🔍 Validating trading symbol: {symbol}")
-            
-            is_valid = await self.client.validate_symbol(symbol)
-            if not is_valid:
-                print(f"❌ Symbol '{symbol}' is not valid or not supported for API trading")
-                print("💡 Suggestions:")
-                print("  • Check the symbol format (should be like BTCUSDT, ETHUSDT)")
-                print("  • Use --symbol flag to override (e.g., --symbol BTCUSDT)")
-                print("  • Run 'python main.py --action symbols --search BTC' to find valid symbols")
-                return None
-            
-            print(f"✅ Symbol '{symbol}' is valid for trading")
-            
-            # Calculate and show bracket details
-            stop_loss_price = price * (1 - stop_loss_pct / 100)
-            take_profit_price = price * (1 + take_profit_pct / 100)
-            
-            print(f"\n🎯 Bracket Order Details:")
-            print(f"  📊 Symbol: {symbol}")
-            print(f"  💰 Entry Price: ${price}")
-            print(f"  📉 Stop Loss: ${stop_loss_price:.4f} (-{stop_loss_pct}%)")
-            print(f"  📈 Take Profit: ${take_profit_price:.4f} (+{take_profit_pct}%)")
-            if quantity:
-                print(f"  🔢 Quantity: {quantity}")
-                total_cost = price * quantity
-                max_loss = (price - stop_loss_price) * quantity
-                max_profit = (take_profit_price - price) * quantity
-                print(f"  💵 Total Cost: ${total_cost:.2f}")
-                print(f"  🔻 Max Loss: ${max_loss:.2f}")
-                print(f"  🔺 Max Profit: ${max_profit:.2f}")
-            
-            result = await self.engine.place_bracket_buy_order(price, quantity, stop_loss_pct, take_profit_pct)
-            if result:
-                logger.info(f"Bracket buy order result: {result}")
-                return result
-            else:
-                logger.warning("Bracket buy order was not placed")
-                return None
-
-    async def place_sequential_bracket_buy_order(
-        self, 
-        entry_price: float, 
-        stop_loss_price: float,
-        take_profit_price: float,
-        quantity: Optional[float] = None
-    ):
-        """
-        Place a sequential bracket buy order:
-        1. Place LIMIT buy order at entry_price
-        2. Monitor until filled
-        3. Automatically place TAKE_PROFIT and STOP_LOSS orders
-        
-        Example: buy 5 XRP at 1.1 USDT, stop loss at 1.0 USDT, take profit at 2.0 USDT
-        """
-        if not self.engine:
-            await self.initialize()
-        
-        async with self.client:
-            # Validate symbol first
-            symbol = self.config.trading_params.symbol
-            print(f"🔍 Validating trading symbol: {symbol}")
-            
-            is_valid = await self.client.validate_symbol(symbol)
-            if not is_valid:
-                print(f"❌ Symbol '{symbol}' is not valid or not supported for trading")
-                print("💡 Suggestions:")
-                print("  • Check the symbol format (should be like BTCUSDT, ETHUSDT)")
-                print("  • Use --symbol flag to override (e.g., --symbol BTCUSDT)")
-                print("  • Run 'python main.py --action symbols --search BTC' to find valid symbols")
-                return None
-            
-            print(f"✅ Symbol '{symbol}' is valid for trading")
-            
-            # Display sequential bracket order details
-            print(f"\n🎯 Sequential Bracket Order Details:")
-            print(f"  📊 Symbol: {symbol}")
-            print(f"  🔥 Step 1: Place LIMIT BUY order @ ${entry_price}")
-            print(f"  ⏳ Step 2: Wait for order to fill")
-            print(f"  🛡️  Step 3: Place STOP_LOSS order @ ${stop_loss_price}")
-            print(f"  💰 Step 4: Place TAKE_PROFIT order @ ${take_profit_price}")
-            
-            if quantity:
-                print(f"  🔢 Quantity: {quantity}")
-                total_cost = entry_price * quantity
-                max_loss = (entry_price - stop_loss_price) * quantity
-                max_profit = (take_profit_price - entry_price) * quantity
-                print(f"  💵 Total Cost: ${total_cost:.2f}")
-                print(f"  🔻 Max Loss: ${max_loss:.2f}")
-                print(f"  🔺 Max Profit: ${max_profit:.2f}")
-                if max_loss > 0:
-                    print(f"  📈 Risk/Reward Ratio: 1:{max_profit/max_loss:.2f}")
-            
-            # Validate price logic
-            if stop_loss_price >= entry_price:
-                print(f"❌ Error: Stop loss price (${stop_loss_price}) must be below entry price (${entry_price}) for buy orders")
-                return None
-            
-            if take_profit_price <= entry_price:
-                print(f"❌ Error: Take profit price (${take_profit_price}) must be above entry price (${entry_price}) for buy orders")
-                return None
-            
-            print(f"\n🚀 Initiating sequential bracket order...")
-            
-            result = await self.engine.place_sequential_bracket_buy_order(
-                entry_price=entry_price,
-                stop_loss_price=stop_loss_price,
-                take_profit_price=take_profit_price,
-                quantity=quantity
-            )
-            
-            if result:
-                print(f"\n🔄 Starting position monitoring...")
-                print(f"💡 The bot will now monitor your position and manage the protective orders automatically.")
-                print(f"📊 Order ID: {result['main_order'].get('orderId', 'Unknown')}")
-                print(f"⏳ Press Ctrl+C to stop monitoring and exit")
-                
-                if not self.config.dry_run:
-                    print(f"🚨 LIVE TRADING MODE - Real orders are being monitored!")
-                else:
-                    print(f"🧪 DRY RUN MODE - This is a simulation")
-                
-                print()
-                logger.info(f"Sequential bracket order placed, starting monitoring...")
-                
-                # Start the monitoring loop (similar to the "start" action)
-                if not self.client or not self.engine:
-                    await self.initialize()
-                
-                self.running = True
-                
-                async with self.client:
-                    # Start position monitoring task
-                    monitor_task = asyncio.create_task(self.engine.monitor_positions())
+            # Recent Orders
+            if self.engine.orders:
+                try:
+                    self.stdscr.addstr(29, 0, "📝 Recent Orders:", curses.A_BOLD)
+                except:
+                    self.stdscr.addstr(29, 0, "Recent Orders:", curses.A_BOLD)
                     
-                    try:
-                        logger.info("Position monitoring started. Press Ctrl+C to exit.")
-                        # Keep the program running while monitoring
-                        while self.running:
-                            await asyncio.sleep(1)
-                            
-                    except KeyboardInterrupt:
-                        logger.info("Received shutdown signal, stopping monitoring...")
-                        self.running = False
-                    finally:
-                        monitor_task.cancel()
-                        try:
-                            await monitor_task
-                        except asyncio.CancelledError:
-                            pass
-                        
-                        logger.info("Position monitoring stopped")
-                        print("\n👋 Monitoring stopped. Your positions may still be active on the exchange.")
-                        print("💡 To resume monitoring, run: python main.py --action start")
-            else:
-                print(f"❌ Failed to place sequential bracket order")
-                return None
-
-    async def place_simple_bracket_buy_order(
-        self, 
-        entry_price: float, 
-        stop_loss_price: float,
-        take_profit_price: float,
-        quantity: Optional[float] = None
-    ):
-        """Place a simple bracket buy order using MEXC's native SL/TP capabilities"""
-        if not self.engine:
-            await self.initialize()
-        
-        async with self.client:
-            # Validate symbol first
-            symbol = self.config.trading_params.symbol
-            print(f"🔍 Validating trading symbol: {symbol}")
-            
-            is_valid = await self.client.validate_symbol(symbol)
-            if not is_valid:
-                print(f"❌ Symbol '{symbol}' is not valid or not supported for API trading")
-                print("💡 Suggestions:")
-                print("  • Check the symbol format (should be like BTCUSDT, ETHUSDT)")
-                print("  • Use --symbol flag to override (e.g., --symbol XRPUSDT)")
-                print("  • Run 'python main.py --action symbols --search XRP' to find valid symbols")
-                return None
-            
-            print(f"✅ Symbol '{symbol}' is valid for trading")
-            
-            # Display native bracket order details
-            print(f"\n🚀 Native Bracket Order Details:")
-            print(f"  📊 Symbol: {symbol}")
-            print(f"  💰 Entry Price: ${entry_price}")
-            print(f"  🛡️  Stop Loss: ${stop_loss_price}")
-            print(f"  💎 Take Profit: ${take_profit_price}")
-            print(f"  ✨ MEXC handles all SL/TP logic automatically")
-            
-            if quantity:
-                print(f"  🔢 Quantity: {quantity}")
-                total_cost = entry_price * quantity
-                max_loss = (entry_price - stop_loss_price) * quantity
-                max_profit = (take_profit_price - entry_price) * quantity
-                print(f"  💵 Total Cost: ${total_cost:.2f}")
-                print(f"  🔻 Max Loss: ${max_loss:.2f}")
-                print(f"  🔺 Max Profit: ${max_profit:.2f}")
-                if max_loss > 0:
-                    print(f"  📈 Risk/Reward Ratio: 1:{max_profit/max_loss:.2f}")
-            
-            # Validate price logic
-            if stop_loss_price >= entry_price:
-                print(f"❌ Error: Stop loss price (${stop_loss_price}) must be below entry price (${entry_price}) for buy orders")
-                return None
-            
-            if take_profit_price <= entry_price:
-                print(f"❌ Error: Take profit price (${take_profit_price}) must be above entry price (${entry_price}) for buy orders")
-                return None
-            
-            print(f"\n🎯 Placing native MEXC bracket order...")
-            
-            result = await self.engine.place_simple_bracket_order(
-                entry_price=entry_price,
-                stop_loss_price=stop_loss_price,
-                take_profit_price=take_profit_price,
-                quantity=quantity
-            )
-            
-            if result:
-                print(f"\n✅ Native bracket order placed successfully!")
-                print(f"📊 Bracket Type: {result.get('bracket_type', 'Unknown')}")
-                print(f"🎯 Order ID: {result.get('main_order', {}).get('orderId', 'Unknown')}")
-                print(f"🚀 MEXC will automatically handle:")
-                print(f"  • Stop loss execution at ${stop_loss_price}")
-                print(f"  • Take profit execution at ${take_profit_price}")
-                print(f"💡 No monitoring needed - everything is exchange-managed!")
-                
-                if not self.config.dry_run:
-                    print(f"🚨 LIVE TRADING MODE - Real orders placed!")
-                else:
-                    print(f"🧪 DRY RUN MODE - This was a simulation")
-                
-                logger.info(f"Simple bracket order result: {result}")
-                return result
-            else:
-                print(f"❌ Failed to place native bracket order")
-                return None
-
-async def place_simple_bracket_order(args, trading_engine):
-    """Place a simple bracket order using MEXC's native SL/TP capabilities"""
-    try:
-        if not args.price or not args.stop_loss or not args.take_profit:
-            logger.error("Simple bracket order requires --price, --stop-loss, and --take-profit")
-            return False
-        
-        logger.info("Placing simple bracket order with native MEXC SL/TP...")
-        
-        result = await trading_engine.place_simple_bracket_order(
-            entry_price=args.price,
-            stop_loss_price=args.stop_loss,
-            take_profit_price=args.take_profit,
-            quantity=args.quantity
-        )
-        
-        if result:
-            logger.info("✅ Simple bracket order placed successfully!")
-            logger.info("🚀 MEXC will handle all stop loss and take profit execution")
-            logger.info("💡 No monitoring needed - everything is automated!")
-            return True
-        else:
-            logger.error("❌ Failed to place simple bracket order")
-            return False
-            
-    except Exception as e:
-        logger.error(f"Error placing simple bracket order: {str(e)}")
-        return False
-
-async def main():
-    """Main entry point"""
-    parser = argparse.ArgumentParser(description="MEXC⚡: High-Performance Crypto Trading Bot for MEXC Exchange")
-    parser.add_argument("--action", choices=["start", "buy", "sell", "status", "symbols", "validate", "test-permissions", "find-tradeable", "debug-tpsl", "test-tpsl-types", "bracket", "sequential", "simple-bracket"], 
-                       default="start", help="Action to perform")
-    parser.add_argument("--price", type=float, help="Price for buy/sell orders")
-    parser.add_argument("--quantity", type=float, help="Quantity for orders")
-    parser.add_argument("--symbol", type=str, help="Trading symbol override")
-    parser.add_argument("--search", type=str, help="Search term for symbols")
-    parser.add_argument("--dry-run", action="store_true", help="Enable dry run mode")
-    parser.add_argument("--config", type=str, help="Configuration file path")
-    parser.add_argument("--time", type=str, help="Schedule order for specific time (format: HH:MM or HH:MM:SS)")
-    parser.add_argument("--timezone", type=str, default="America/New_York", help="Timezone for scheduled orders (default: America/New_York)")
-    parser.add_argument("--stop-loss", type=float, help="Stop-loss price for sequential bracket orders")
-    parser.add_argument("--take-profit", type=float, help="Take-profit price for sequential bracket orders")
-    
-    args = parser.parse_args()
-    
-    try:
-        # Load configuration
-        config = load_config()
-        
-        # Apply command line overrides
-        if args.symbol:
-            config.trading_params.symbol = args.symbol
-        if args.dry_run:
-            config.dry_run = True
-        
-        # Create bot instance
-        bot = TradingBot(config)
-        
-        # Execute requested action
-        if args.action == "start":
-            await bot.start()
-            
-        elif args.action == "buy":
-            if not args.price:
-                print("Error: --price is required for buy orders")
-                sys.exit(1)
-            
-            # Handle scheduled orders
-            if args.time:
-                print(f"📅 Scheduling BUY order for {args.time} {args.timezone}")
-                print(f"💰 Order details: {args.quantity or 'auto'} units at ${args.price}")
-                await wait_until_time(args.time, args.timezone)
-            
-            result = await bot.place_buy_order(args.price, args.quantity)
-            print(f"Buy order result: {result}")
-            
-        elif args.action == "sell":
-            if not args.price:
-                print("Error: --price is required for sell orders")
-                sys.exit(1)
-            
-            # Handle scheduled orders
-            if args.time:
-                print(f"📅 Scheduling SELL order for {args.time} {args.timezone}")
-                print(f"💰 Order details: {args.quantity or 'auto'} units at ${args.price}")
-                await wait_until_time(args.time, args.timezone)
-            
-            result = await bot.place_sell_order(args.price, args.quantity)
-            print(f"Sell order result: {result}")
-            
-        elif args.action == "status":
-            status = await bot.get_status()
-            print("Trading Bot Status:")
-            for key, value in status.items():
-                print(f"  {key}: {value}")
-        
-        elif args.action == "symbols":
-            await bot.search_symbols(args.search)
-            
-        elif args.action == "validate":
-            await bot.validate_current_symbol()
-        
-        elif args.action == "test-permissions":
-            await bot.test_permissions()
-        
-        elif args.action == "find-tradeable":
-            await bot.find_tradeable_symbols()
-        
-        elif args.action == "debug-tpsl":
-            await bot.debug_tpsl_support()
-        
-        elif args.action == "test-tpsl-types":
-            await bot.test_tpsl_order_types()
-        
-        elif args.action == "bracket":
-            if not args.price:
-                print("Error: --price is required for bracket orders")
-                sys.exit(1)
-            
-            # Use percentage-based bracket orders (existing functionality)
-            stop_loss_pct = getattr(args, 'stop_loss', 5.0)  # Default 5%
-            take_profit_pct = getattr(args, 'take_profit', 10.0)  # Default 10%
-            
-            result = await bot.place_bracket_buy_order(args.price, args.quantity, stop_loss_pct, take_profit_pct)
-            print(f"Bracket buy order result: {result}")
-        
-        elif args.action == "sequential":
-            if not args.price:
-                print("Error: --price is required for sequential bracket orders")
-                sys.exit(1)
-            if not args.stop_loss:
-                print("Error: --stop-loss price is required for sequential bracket orders")
-                print("Example: --stop-loss 1.0")
-                sys.exit(1)
-            if not args.take_profit:
-                print("Error: --take-profit price is required for sequential bracket orders")
-                print("Example: --take-profit 5.0")
-                sys.exit(1)
-            
-            print(f"\n🎯 Sequential Bracket Order Request:")
-            print(f"  Entry Price: ${args.price}")
-            print(f"  Stop Loss: ${args.stop_loss}")
-            print(f"  Take Profit: ${args.take_profit}")
-            if args.quantity:
-                print(f"  Quantity: {args.quantity}")
-            
-            # Handle scheduled orders for sequential bracket
-            if args.time:
-                print(f"📅 Scheduling Sequential Bracket order for {args.time} {args.timezone}")
-                print(f"💰 Entry: {args.quantity or 'auto'} units at ${args.price}")
-                print(f"🛡️ Stop Loss: ${args.stop_loss} | Take Profit: ${args.take_profit}")
-                await wait_until_time(args.time, args.timezone)
-            
-            result = await bot.place_sequential_bracket_buy_order(
-                entry_price=args.price,
-                stop_loss_price=args.stop_loss,
-                take_profit_price=args.take_profit,
-                quantity=args.quantity
-            )
-            
-            if result:
-                print(f"\n🔄 Starting position monitoring...")
-                print(f"💡 The bot will now monitor your position and manage the protective orders automatically.")
-                print(f"📊 Order ID: {result['main_order'].get('orderId', 'Unknown')}")
-                print(f"⏳ Press Ctrl+C to stop monitoring and exit")
-                
-                if not config.dry_run:
-                    print(f"🚨 LIVE TRADING MODE - Real orders are being monitored!")
-                else:
-                    print(f"🧪 DRY RUN MODE - This is a simulation")
-                
-                print()
-                logger.info(f"Sequential bracket order placed, starting monitoring...")
-                
-                # Start the monitoring loop (similar to the "start" action)
-                if not bot.client or not bot.engine:
-                    await bot.initialize()
-                
-                bot.running = True
-                
-                async with bot.client:
-                    # Start position monitoring task
-                    monitor_task = asyncio.create_task(bot.engine.monitor_positions())
+                for i, order in enumerate(self.engine.orders[-3:], 1):
+                    side = order.get('side', '')
+                    qty = order.get('quantity', 0)
+                    price = order.get('price', 0)
+                    status = order.get('status', '')
+                    timestamp = order.get('timestamp', '')
+                    order_color = self._get_color(side)
                     
-                    try:
-                        logger.info("Position monitoring started. Press Ctrl+C to exit.")
-                        # Keep the program running while monitoring
-                        while bot.running:
-                            await asyncio.sleep(1)
-                            
-                    except KeyboardInterrupt:
-                        logger.info("Received shutdown signal, stopping monitoring...")
-                        bot.running = False
-                    finally:
-                        monitor_task.cancel()
+                    if timestamp:
                         try:
-                            await monitor_task
-                        except asyncio.CancelledError:
-                            pass
+                            if isinstance(timestamp, str):
+                                timestamp = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+                            timestamp_str = timestamp.strftime('%H:%M:%S')
+                        except:
+                            timestamp_str = str(timestamp)
+                    else:
+                        timestamp_str = 'N/A'
                         
-                        logger.info("Position monitoring stopped")
-                        print("\n👋 Monitoring stopped. Your positions may still be active on the exchange.")
-                        print("💡 To resume monitoring, run: python main.py --action start")
-            else:
-                print(f"❌ Failed to place sequential bracket order")
-                sys.exit(1)
-        elif args.action == "simple-bracket":
-            if not args.price:
-                print("Error: --price is required for simple bracket orders")
-                sys.exit(1)
-            if not args.stop_loss:
-                print("Error: --stop-loss price is required for simple bracket orders")
-                print("Example: --stop-loss 1.0")
-                sys.exit(1)
-            if not args.take_profit:
-                print("Error: --take-profit price is required for simple bracket orders")
-                print("Example: --take-profit 5.0")
-                sys.exit(1)
+                    order_str = f"{timestamp_str} - {side} {qty:.8f} @ ${price:.4f} ({status})"
+                    self.stdscr.addstr(29+i, 2, order_str, order_color)
             
-            print(f"\n🚀 Simple Native Bracket Order Request:")
-            print(f"  Entry Price: ${args.price}")
-            print(f"  Stop Loss: ${args.stop_loss}")
-            print(f"  Take Profit: ${args.take_profit}")
-            if args.quantity:
-                print(f"  Quantity: {args.quantity}")
-            print(f"  ✨ Using MEXC's native SL/TP capabilities")
+            # Controls footer
+            try:
+                self.stdscr.addstr(height-1, 0, "⌨️  Controls: [Q]uit | [P]ause/Resume | [R]eset")
+            except:
+                self.stdscr.addstr(height-1, 0, "Controls: Q=Quit | P=Pause/Resume | R=Reset")
             
-            # Handle scheduled orders for simple bracket
-            if args.time:
-                print(f"📅 Scheduling Simple Bracket order for {args.time} {args.timezone}")
-                print(f"💰 Entry: {args.quantity or 'auto'} units at ${args.price}")
-                print(f"🛡️ Stop Loss: ${args.stop_loss} | Take Profit: ${args.take_profit}")
-                await wait_until_time(args.time, args.timezone)
+            self.stdscr.refresh()
             
-            result = await bot.place_simple_bracket_buy_order(
-                entry_price=args.price,
-                stop_loss_price=args.stop_loss,
-                take_profit_price=args.take_profit,
-                quantity=args.quantity
-            )
+        except curses.error as e:
+            logger.error(f"Curses display error: {e}")
             
-            if not result:
-                sys.exit(1)
-        else:
-            logger.error(f"Unknown action: {args.action}")
+        except Exception as e:
+            logger.error(f"Display update error: {e}")
+
+    async def _check_config_changes(self) -> bool:
+        """
+        Check if the .env file has been modified and reload config if necessary.
+        Returns True if config was reloaded, False otherwise.
+        """
+        try:
+            # Ensure .env file exists
+            if not os.path.exists('.env'):
+                logger.error("Configuration file .env not found")
+                return False
+                
+            try:
+                current_mtime = os.path.getmtime('.env')
+            except OSError as e:
+                logger.error(f"Error accessing .env file: {e}")
+                return False
+            
+            if current_mtime != self._last_env_mtime:
+                logger.info("Detected .env file changes, reloading configuration...")
+                
+                # Backup current configuration state
+                old_symbol = self.engine.config.trading_params.symbol
+                
+                try:
+                    # Update modification time first to prevent reload loops
+                    self._last_env_mtime = current_mtime
+                    
+                    if hasattr(self.engine, 'reload_config'):
+                        success = await self.engine.reload_config()
+                        if success:
+                            new_symbol = self.engine.config.trading_params.symbol
+                            if old_symbol != new_symbol:
+                                logger.info(f"Trading symbol changed: {old_symbol} → {new_symbol}")
+                                # Update UI status to indicate the change
+                                self.status = f"Symbol changed to {new_symbol}"
+                            logger.info("Configuration reloaded successfully")
+                            return True
+                        else:
+                            logger.error("Failed to reload configuration")
+                            return False
+                    else:
+                        logger.warning("Trading engine does not support config reloading")
+                        return False
+                except Exception as e:
+                    logger.error(f"Error during configuration reload: {e}")
+                    logger.debug("Stack trace:", exc_info=True)
+                    # Restore modification time to allow retry
+                    self._last_env_mtime = current_mtime - 1
+                    return False
             return False
-    
+        except Exception as e:
+            logger.error(f"Unexpected error checking configuration changes: {e}")
+            logger.debug("Stack trace:", exc_info=True)
+            return False
+
+    async def _print_headless_status(self, current_price: float, prediction_info: Dict[str, Any]):
+        """Print status updates in headless mode"""
+        try:
+            # Clear screen
+            print("\033[H\033[J", end="")
+        except:
+            print("\n" * 5)
+        
+        # Header
+        print("🚀 MEXC AI Trading Bot (Headless Mode)")
+        print("=" * 50)
+        
+        # Status
+        status = "PAUSED" if self.paused else self.status
+        status_icon = "⏸️ " if self.paused else "🟢" if status == "RUNNING" else "🟡"
+        print(f"Status: {status_icon} {status}")
+        print(f"Last Update: {self._last_update.strftime('%H:%M:%S')}")
+        print()
+        
+        # User Balance
+        print("👤 User Balance:")
+        try:
+            symbol = self.engine.config.trading_params.symbol
+            # Handle both underscore and no-underscore formats
+            base_asset = symbol.split('_')[0] if '_' in symbol else symbol.replace('USDT', '').replace('_', '')
+            # Also handle lower/uppercase in symbol name
+            base_asset = base_asset.upper()
+            balances = await self.engine.client.get_account_balance()
+            
+            # Display USDT balance
+            usdt_balance = balances.get('USDT', {'free': 0, 'locked': 0, 'total': 0})
+            print(f"  USDT Balance: ${usdt_balance['total']:.2f}")
+            print(f"    Available: ${usdt_balance['free']:.2f}")
+            print(f"    Locked: ${usdt_balance['locked']:.2f}")
+            
+            # Display base asset balance (the selected trading currency)
+            base_balance = balances.get(base_asset, {'free': 0, 'locked': 0, 'total': 0})
+            print(f"  {base_asset} Balance: {base_balance['total']:.8f}")
+            print(f"    Available: {base_balance['free']:.8f}")
+            print(f"    Locked: {base_balance['locked']:.8f}")
+        except Exception as e:
+            print(f"  Error fetching balances: {str(e)}")
+        print()
+        
+        # Market Data
+        print("📊 Market Data:")
+        symbol = self.engine.config.trading_params.symbol
+        timeframe = self.engine.config.trading_params.timeframe
+        print(f"  Symbol: {symbol}")
+        print(f"  Current Price: ${current_price:.4f}")
+        print(f"  Timeframe: {timeframe}")
+        
+        # MA Indicators
+        if hasattr(self.engine, 'fast_ma') and hasattr(self.engine, 'slow_ma'):
+            fast_ma = self.engine.fast_ma[-1] if len(self.engine.fast_ma) > 0 else 0
+            slow_ma = self.engine.slow_ma[-1] if len(self.engine.slow_ma) > 0 else 0
+            ma_signal = "BUY" if fast_ma > slow_ma else "SELL" if fast_ma < slow_ma else "NEUTRAL"
+            print(f"  Fast MA: ${fast_ma:.4f}")
+            print(f"  Slow MA: ${slow_ma:.4f}")
+            print(f"  MA Signal: {ma_signal}")
+        print()
+        
+        # Trading Info
+        print("💼 Trading Status:")
+        mode = "DRY RUN" if self.engine.config.trading_params.dry_run else "LIVE TRADING"
+        print(f"  Mode: {mode}")
+        print(f"  Trades Today: {self.engine.daily_trades}/{self.engine.config.trading_params.max_orders_per_day}")
+        
+        # Trading Parameters
+        if hasattr(self.engine.config.trading_params, 'trade_amount'):
+            print(f"  Trade Amount: ${self.engine.config.trading_params.trade_amount:.2f}")
+        if hasattr(self.engine.config.trading_params, 'stop_loss_pct'):
+            print(f"  Stop Loss: {self.engine.config.trading_params.stop_loss_pct:.1f}%")
+        if hasattr(self.engine.config.trading_params, 'take_profit_pct'):
+            print(f"  Take Profit: {self.engine.config.trading_params.take_profit_pct:.1f}%")
+        print()
+        
+        # AI Predictions
+        print("🤖 AI Analysis:")
+        if prediction_info:
+            direction = prediction_info.get('direction', 'NEUTRAL')
+            confidence = prediction_info.get('confidence', 0.0)
+            print(f"  Signal: {direction}")
+            print(f"  Confidence: {confidence*100:.1f}%")
+            
+            if 'predicted_price' in prediction_info:
+                pred_price = prediction_info['predicted_price']
+                change = (pred_price - current_price) / current_price
+                print(f"  Target: ${pred_price:.4f}")
+                print(f"  Change: {change*100:+.2f}%")
+            
+            # Add model info if available
+            model_name = prediction_info.get('model_name', '')
+            prediction_length = prediction_info.get('prediction_length', '')
+            confidence_threshold = prediction_info.get('confidence_threshold', '')
+            
+            if model_name:
+                print(f"  Model: {model_name}")
+            if prediction_length:
+                print(f"  Prediction Length: {prediction_length}")
+            if confidence_threshold:
+                print(f"  Conf. Threshold: {confidence_threshold:.1f}")
+        else:
+            print("  No predictions available")
+        print()
+        
+        # Recent Orders
+        if self.engine.orders:
+            print("📝 Recent Orders:")
+            for order in self.engine.orders[-3:]:
+                side = order.get('side', '')
+                qty = order.get('quantity', 0)
+                price = order.get('price', 0)
+                status = order.get('status', '')
+                timestamp = order.get('timestamp', '')
+                
+                if timestamp:
+                    try:
+                        if isinstance(timestamp, str):
+                            timestamp = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+                        timestamp_str = timestamp.strftime('%H:%M:%S')
+                    except:
+                        timestamp_str = str(timestamp)
+                else:
+                    timestamp_str = 'N/A'
+                    
+                print(f"  {timestamp_str} - {side} {qty:.8f} @ ${price:.4f} ({status})")
+            print()
+        
+        print("Press Ctrl+C to stop the bot")
+        print("-" * 50)
+
+    async def start(self):
+        """Start the UI loop"""
+        self._running = True
+        self._last_values = {}  # Store last known good values
+        startup_timeout = 60  # 60 seconds timeout for initial startup
+        
+        # Create background task for strategy updates
+        self._update_task = asyncio.create_task(self._run_strategy_updates())
+        
+        # Initialize UI
+        if not self.headless:
+            try:
+                if not self._init_curses():
+                    logger.warning("Failed to initialize curses UI, falling back to headless mode")
+                    self.headless = True
+            except Exception as e:
+                logger.error(f"Failed to initialize curses UI: {e}")
+                self.headless = True
+        
+        # Initialize engine
+        try:
+            logger.info("Initializing trading engine...")
+            async with asyncio.timeout(startup_timeout):
+                if not await self.engine.initialize():
+                    raise Exception("Failed to initialize trading engine")
+                logger.info("Trading engine initialized successfully")
+        except asyncio.TimeoutError:
+            logger.error(f"Engine initialization timed out after {startup_timeout} seconds")
+            self._cleanup_curses()
+            return
+        except Exception as e:
+            logger.error(f"Failed to initialize engine: {e}")
+            self._cleanup_curses()
+            return
+            
+        # Main loop
+        try:
+            while self._running:
+                try:
+                    # Get and validate current price
+                    current_price = await self.engine.get_current_price(self.engine.config.trading_params.symbol)
+                    
+                    if current_price and current_price > 0:
+                        logger.debug(f"Got current price: {current_price}")
+                        self.engine.last_price = current_price
+                        self._last_values['price'] = current_price
+                        self._last_price_warning = False
+                    else:
+                        current_price = self._last_values.get('price', 0)
+                        if not getattr(self, '_last_price_warning', False):
+                            logger.warning("No price data available or invalid price")
+                            logger.info(f"Engine state: last_price={getattr(self.engine, 'last_price', 'N/A')}")
+                            logger.info(f"Symbol: {self.engine.config.trading_params.symbol}")
+                            self._last_price_warning = True
+                    
+                    # Get prediction info and validate
+                    prediction_info = {}
+                    if hasattr(self.engine, 'chronos'):
+                        try:
+                            prediction_info = self.engine.chronos.get_last_prediction()
+                            if not prediction_info:
+                                if not hasattr(self, '_last_prediction_warning'):
+                                    logger.warning("Prediction info is empty. Model may still be initializing...")
+                                    self._last_prediction_warning = True
+                                prediction_info = self._last_values.get('prediction_info', {})
+                            else:
+                                self._last_values['prediction_info'] = prediction_info
+                                self._last_prediction_warning = False
+                        except Exception as e:
+                            logger.error(f"Failed to get prediction info: {e}")
+                            prediction_info = self._last_values.get('prediction_info', {})
+                            if not hasattr(self, '_last_prediction_warning'):
+                                logger.error("Prediction system error. Check model initialization and data.")
+                                logger.debug(f"Chronos state: {vars(self.engine.chronos)}")
+                                self._last_prediction_warning = True
+                
+                    # Always update display
+                    await self._update_display(current_price, prediction_info)
+                    self._last_update = datetime.now()
+                
+                    # Update status if we have valid data
+                    if current_price > 0:
+                        self.status = "RUNNING"
+                    elif self.status == "Initializing...":
+                        self.status = "Waiting for data..."
+                
+                except Exception as e:
+                    logger.error(f"Error updating display: {e}")
+                
+                # Handle keyboard input in curses mode
+                if not self.headless and self.stdscr:
+                    try:
+                        self.stdscr.nodelay(1)  # Non-blocking input
+                        ch = self.stdscr.getch()
+                        if ch != -1:
+                            if ch in [ord('q'), ord('Q')]:
+                                logger.info("User requested shutdown")
+                                self._running = False
+                                break
+                            elif ch in [ord('p'), ord('P')]:
+                                self.paused = not self.paused
+                                self.status = "PAUSED" if self.paused else "RUNNING"
+                                if self.paused:
+                                    logger.info("Bot paused by user")
+                                else:
+                                    logger.info("Bot resumed by user")
+                            elif ch in [ord('r'), ord('R')]:
+                                logger.info("User requested reset")
+                                self.engine.reset()
+                                self.status = "Reset complete"
+                    except curses.error:
+                        pass
+                
+                await asyncio.sleep(1)  # Update interval
+                
+        except KeyboardInterrupt:
+            logger.info("Received keyboard interrupt, shutting down...")
+            self._running = False
+            
+        except Exception as e:
+            logger.error(f"UI error: {str(e)}")
+            self._running = False
+            
+        finally:
+            self._cleanup_curses()
+                
+    async def stop(self):
+        """Stop the UI"""
+        self._running = False
+        if not self.headless:
+            self._cleanup_curses()
+            
+    async def _get_strategy_state(self) -> Dict[str, Any]:
+        """Get the current strategy state for display"""
+        try:
+            current_price = await self.engine.client.get_latest_price(self.engine.config.trading_params.symbol)
+            # You can add more prediction info here as needed
+            prediction_info = {}
+            return {"current_price": current_price, "prediction_info": prediction_info}
+        except Exception as e:
+            logger.error(f"Error getting strategy state: {e}")
+            return {"current_price": 0.0, "prediction_info": {}}
+
+def parse_args():
+    parser = argparse.ArgumentParser(description='MEXC Trading Bot')
+    parser.add_argument('--action', type=str, choices=['start', 'test-api'], default='start', help='Bot action')
+    parser.add_argument('--symbol', type=str, help='Trading pair symbol (e.g., BTC_USDT). If not provided, uses value from .env')
+    parser.add_argument('--amount', type=float, help='Trading amount in USDT. If not provided, uses value from .env')
+    parser.add_argument('--dry-run', action='store_true', help='Run in dry-run mode (no real trades)')
+    parser.add_argument('--headless', action='store_true', help='Run without UI (logs only)')
+    return parser.parse_args()
+
+async def test_api():
+    """Test API connection and credentials"""
+    config = load_config()
+    try:
+        async with MexcClient(config.credentials) as client:
+            # Test market data
+            pairs = await client.get_trading_pairs()
+            logger.info(f"Successfully fetched {len(pairs)} trading pairs")
+            
+            # Test authentication
+            account = await client.get_account()
+            logger.info(f"Successfully authenticated with account: {account.get('account_id', 'Unknown')}")
+            
+            # Test rate limits
+            for _ in range(3):
+                await client.get_ticker("BTC_USDT")
+            logger.info("Rate limiting working correctly")
+            
+            logger.info("✅ API connection test successful")
     except Exception as e:
-        logger.error(f"Application error: {str(e)}")
+        logger.error(f"❌ API test failed: {str(e)}")
         sys.exit(1)
 
-if __name__ == "__main__":
-    # Create logs directory if it doesn't exist
-    os.makedirs("logs", exist_ok=True)
+async def main():
+    try:
+        args = parse_args()
+        logger.debug("Command line arguments: {}", args)
+        
+        # Load configuration
+        config = load_config()
+        logger.debug("Configuration loaded from .env")
+        
+        # Only override with CLI args if they are explicitly provided
+        if args.symbol:
+            logger.warning("Command-line symbol argument overriding .env setting: {}", args.symbol)
+            logger.warning("Consider updating your .env file instead of using command-line arguments")
+            config.trading_params.symbol = args.symbol
+            
+        if args.amount:
+            logger.warning("Command-line amount argument overriding .env setting: {}", args.amount)
+            config.trading_params.trade_amount = args.amount
+            
+        if args.dry_run:
+            logger.warning("Command-line dry-run flag overriding .env setting")
+            config.trading_params.dry_run = True
+            
+        if args.headless:
+            logger.info("Running in headless mode")
+            config.headless = True
+            
+        # Log the active configuration
+        logger.info("Active configuration:")
+        logger.info("  Symbol: {}", config.trading_params.symbol)
+        logger.info("  Trade Amount: {}", config.trading_params.trade_amount)
+        logger.info("  Mode: {}", "DRY RUN" if config.trading_params.dry_run else "LIVE TRADING")
+            
+        logger.debug("Final configuration: {}", 
+                    {k: v for k, v in config.dict().items() if k != 'credentials'})
+    except Exception as e:
+        logger.error("Error during initialization: {}", str(e))
+        raise
+        
+    if args.action == 'test-api':
+        await test_api()
+        return
     
-    # Run the main function
-    asyncio.run(main()) 
+    # Initialize components
+    client = None
+    trading_engine = None
+    ui = None
+    
+    MAX_RETRIES = 3
+    retry_count = 0
+    last_error = None
+    
+    while retry_count < MAX_RETRIES:
+        try:
+            # Create fresh instances
+            client = MexcClient(config.credentials)
+            trading_engine = TradingEngine(config, client)
+            ui = TradingBotUI(trading_engine, config.headless)
+            
+            async with client:
+                # Initialize trading engine
+                await trading_engine.initialize()
+                logger.info("Trading bot initialized successfully")
+                
+                if config.trading_params.dry_run:
+                    logger.warning("Bot is running in DRY RUN mode - no real trades will be executed")
+                
+                # Start both components
+                await asyncio.gather(
+                    trading_engine.start(),
+                    ui.start()
+                )
+                break  # Success
+                
+        except KeyboardInterrupt:
+            logger.info("Received shutdown signal, cleaning up...")
+            break
+            
+        except Exception as e:
+            last_error = e
+            retry_count += 1
+            logger.error(f"Error in main loop (attempt {retry_count}/{MAX_RETRIES}): {str(e)}")
+            
+            if retry_count < MAX_RETRIES:
+                logger.info(f"Retrying in 5 seconds...")
+                await asyncio.sleep(5)
+            
+        finally:
+            # Clean shutdown
+            if trading_engine:
+                await trading_engine.stop()
+            if ui:
+                await ui.stop()
+    
+    if retry_count >= MAX_RETRIES:
+        logger.error(f"Bot failed to start after {MAX_RETRIES} attempts")
+        logger.error(f"Last error: {str(last_error)}")
+        sys.exit(1)
+
+if __name__ == '__main__':
+    if sys.platform == "win32":
+        os.environ['PYTHONIOENCODING'] = 'utf-8'
+    
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("\nBot shutdown complete")
+    except Exception as e:
+        logger.error(f"Fatal error: {str(e)}")
+        sys.exit(1)

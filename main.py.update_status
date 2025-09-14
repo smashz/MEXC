@@ -1,0 +1,63 @@
+    def _update_status_window(self, current_price: float, prediction_info: Dict[str, Any]):
+        """Update the status window with detailed trading information"""
+        if not self.status_win:
+            return
+            
+        self.status_win.clear()
+        self.status_win.box()
+        max_y, max_x = self.status_win.getmaxyx()
+        
+        # Header with mode and symbol
+        status = "🟢 LIVE" if not self.engine.config.dry_run else "🟡 DRY RUN"
+        self.status_win.addstr(0, 2, f" {HEADER} - {status} ", curses.A_BOLD)
+        self.status_win.addstr(1, 2, f"Symbol: {self.engine.config.trading_params.symbol} | {self.engine.config.ai_config.timeframe}", curses.A_BOLD)
+        
+        # Current price and predictions
+        direction = prediction_info.get('direction', 'NEUTRAL')
+        confidence = prediction_info.get('confidence', 0.0)
+        predicted_price = prediction_info.get('predicted_price')
+        color = curses.color_pair(1) if direction == 'UP' else curses.color_pair(2) if direction == 'DOWN' else curses.color_pair(3)
+        
+        self.status_win.addstr(2, 2, f"Price: ${current_price:.4f}", curses.A_BOLD)
+        if predicted_price and current_price > 0:  # Avoid division by zero
+            try:
+                price_change = ((predicted_price - current_price) / current_price) * 100
+                self.status_win.addstr(2, 25, f"→ ${predicted_price:.4f} ({price_change:+.2f}%)", color | curses.A_BOLD)
+            except (ZeroDivisionError, ValueError):
+                self.status_win.addstr(2, 25, f"→ ${predicted_price:.4f}", color | curses.A_BOLD)
+        
+        # AI prediction info
+        self.status_win.addstr(3, 2, "Signal: ", curses.A_BOLD)
+        self.status_win.addstr(direction, color | curses.A_BOLD)
+        self.status_win.addstr(f" ({confidence:.1%})")
+        
+        # Trading metrics
+        self.status_win.addstr(4, 2, f"Daily Trades: {self.engine.daily_trades}/{self.engine.config.trading_params.max_orders_per_day}", curses.A_BOLD)
+        
+        profit_color = curses.color_pair(1) if self.engine.total_profit >= 0 else curses.color_pair(2)
+        self.status_win.addstr(5, 2, "Total Profit: ", curses.A_BOLD)
+        self.status_win.addstr(f"${self.engine.total_profit:.2f}", profit_color | curses.A_BOLD)
+        
+        daily_profit_color = curses.color_pair(1) if self.engine.daily_profit >= 0 else curses.color_pair(2)
+        self.status_win.addstr(5, 30, "Today: ", curses.A_BOLD)
+        self.status_win.addstr(f"${self.engine.daily_profit:.2f}", daily_profit_color | curses.A_BOLD)
+        
+        # Performance metrics
+        self.status_win.addstr(6, 2, f"Win/Loss: {self.engine.win_count}/{self.engine.loss_count}", curses.A_BOLD)
+        if self.engine.win_count + self.engine.loss_count > 0:
+            win_rate = self.engine.win_count / (self.engine.win_count + self.engine.loss_count) * 100
+            self.status_win.addstr(f" ({win_rate:.1f}%)")
+        
+        # Risk metrics
+        self.status_win.addstr(7, 2, f"Max Drawdown: {self.engine.max_drawdown:.1f}%", curses.A_BOLD)
+        
+        # Last update time
+        last_update = prediction_info.get('last_update')
+        if last_update:
+            try:
+                update_time = datetime.fromisoformat(last_update).strftime('%H:%M:%S')
+                self.status_win.addstr(8, 2, f"Last Update: {update_time}", curses.A_BOLD)
+            except (ValueError, TypeError):
+                pass
+        
+        self.status_win.refresh()

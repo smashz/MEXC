@@ -1,0 +1,493 @@
+#!/usr/bin/env python3
+import asyncio
+import sys
+import os
+import codecs
+import curses
+import argparse
+from typing import Optional, Dict, Any, List
+from datetime import datetime, time as time_obj
+from loguru import logger
+from config import load_config, BotConfig
+from mexc_client import MexcClient
+from trading_engine import TradingEngine
+
+# Constants for UI
+HEADER = "MEXC⚡ Trading Bot"
+STATUS_WINDOW_HEIGHT = 10
+ORDERS_WINDOW_HEIGHT = 8
+SIGNALS_WINDOW_HEIGHT = 6
+
+class TradingBotUI:
+    def __init__(self, engine: TradingEngine, headless: bool = False):
+        self.engine = engine
+        self.headless = headless
+        self.stdscr = None
+        self.status_win = None
+        self.orders_win = None
+        self.signals_win = None
+        self._running = False
+        self._curses_failed = False
+        self._retry_count = 0
+        self.MAX_RETRIES = 3
+        self._last_update = 0
+        
+    def _init_curses(self):
+        if self._curses_failed:
+            self.headless = True
+            return False
+            
+        try:
+            # Try to initialize curses
+            self.stdscr = curses.initscr()
+            curses.start_color()
+            curses.use_default_colors()
+            curses.init_pair(1, curses.COLOR_GREEN, -1)
+            curses.init_pair(2, curses.COLOR_RED, -1)
+            curses.init_pair(3, curses.COLOR_YELLOW, -1)
+            curses.init_pair(4, curses.COLOR_CYAN, -1)
+            curses.noecho()
+            curses.cbreak()
+            self.stdscr.keypad(True)
+            self.stdscr.clear()
+            
+            # Get terminal size and verify it's large enough
+            max_y, max_x = self.stdscr.getmaxyx()
+            min_y = STATUS_WINDOW_HEIGHT + ORDERS_WINDOW_HEIGHT + SIGNALS_WINDOW_HEIGHT
+            min_x = 80
+            
+            if max_y < min_y or max_x < min_x:
+                raise ValueError(f"Terminal too small. Needs at least {min_x}x{min_y}, got {max_x}x{max_y}")
+            
+            self.status_win = curses.newwin(STATUS_WINDOW_HEIGHT, max_x, 0, 0)
+            self.orders_win = curses.newwin(ORDERS_WINDOW_HEIGHT, max_x, STATUS_WINDOW_HEIGHT, 0)
+            self.signals_win = curses.newwin(SIGNALS_WINDOW_HEIGHT, max_x, STATUS_WINDOW_HEIGHT + ORDERS_WINDOW_HEIGHT, 0)
+            return True
+            
+        except Exception as e:
+            self._retry_count += 1
+            logger.warning(f"Failed to initialize curses UI (attempt {self._retry_count}/{self.MAX_RETRIES}): {str(e)}")
+            self._cleanup_curses()
+            
+            if self._retry_count >= self.MAX_RETRIES:
+                logger.warning("Max UI retries reached, switching to headless mode")
+                self._curses_failed = True
+                self.headless = True
+            
+            return False
+        
+    def _cleanup_curses(self):
+        if self.stdscr:
+            curses.nocbreak()
+            self.stdscr.keypad(False)
+            curses.echo()
+            curses.endwin()
+            self.stdscr.keypad(False)
+            curses.echo()
+            curses.nocbreak()
+            curses.endwin()
+    
+    def _update_status_window(self, current_price: float, prediction_info: Dict[str, Any]):
+        if not self.status_win:
+            return
+            
+        self.status_win.clear()
+        self.status_win.box()
+        max_y, max_x = self.status_win.getmaxyx()
+        
+        # Header
+        self.status_win.addstr(0, 2, f" {HEADER} ", curses.A_BOLD)
+        
+        # Trading status
+        status = "LIVE" if not self.engine.config.dry_run else "DRY RUN"
+        color = curses.color_pair(1) if not self.engine.config.dry_run else curses.color_pair(3)
+        self.status_win.addstr(1, 2, f"Status: ", curses.A_BOLD)
+        self.status_win.addstr(status, color | curses.A_BOLD)
+        
+        # Current price
+        self.status_win.addstr(2, 2, f"Price: ${current_price:.4f}", curses.A_BOLD)
+        
+        # AI Prediction info
+        direction = prediction_info.get('direction', 'NEUTRAL')
+        confidence = prediction_info.get('confidence', 0.0)
+        color = curses.color_pair(1) if direction == 'UP' else curses.color_pair(2) if direction == 'DOWN' else curses.color_pair(3)
+        
+        self.status_win.addstr(3, 2, "AI Prediction: ", curses.A_BOLD)
+        self.status_win.addstr(direction, color | curses.A_BOLD)
+        self.status_win.addstr(f" ({confidence:.1%})")
+        
+        # Trading metrics
+        self.status_win.addstr(4, 2, f"Daily Trades: {self.engine.daily_trades}/{self.engine.config.trading_params.max_orders_per_day}", curses.A_BOLD)
+        self.status_win.addstr(5, 2, f"Win/Loss: {self.engine.win_count}/{self.engine.loss_count}", curses.A_BOLD)
+        profit_color = curses.color_pair(1) if self.engine.total_profit >= 0 else curses.color_pair(2)
+        self.status_win.addstr(6, 2, f"Total Profit: ", curses.A_BOLD)
+        self.status_win.addstr(f"${self.engine.total_profit:.2f}", profit_color | curses.A_BOLD)
+        
+        self.status_win.refresh()
+        if self.headless:
+            self._print_headless_status(current_price, prediction_info)
+            return
+            
+        self.status_win.clear()
+        self.status_win.box()
+        self.status_win.addstr(0, 2, f" {HEADER} ", curses.A_BOLD)
+        
+        y = 1
+        self.status_win.addstr(y, 2, f"Symbol: {self.engine.config.trading_params.symbol}")
+        self.status_win.addstr(y, 30, f"Mode: {'LIVE' if not self.engine.config.dry_run else 'DRY RUN'}")
+        
+        y += 1
+        self.status_win.addstr(y, 2, f"Current Price: ${current_price:.4f}")
+        
+        if prediction_info:
+            y += 1
+            direction = prediction_info.get('direction', 'NEUTRAL')
+            confidence = prediction_info.get('confidence', 0.0)
+            color = (
+                curses.color_pair(1) if direction == 'BUY' else
+                curses.color_pair(2) if direction == 'SELL' else
+                curses.color_pair(3)
+            )
+            self.status_win.addstr(y, 2, f"AI Signal: {direction}", color)
+            self.status_win.addstr(y, 30, f"Confidence: {confidence:.2%}")
+        
+        self.status_win.refresh()
+    
+    def _update_orders_window(self, orders: List[Dict[str, Any]]):
+        if not self.orders_win:
+            return
+            
+        self.orders_win.clear()
+        self.orders_win.box()
+        self.orders_win.addstr(0, 2, " Active Orders ", curses.A_BOLD)
+        
+        if not orders:
+            self.orders_win.addstr(1, 2, "No active orders")
+            self.orders_win.refresh()
+            return
+            
+        # Header
+        self.orders_win.addstr(1, 2, "ID".ljust(12) + "Type".ljust(6) + "Price".ljust(12) + "Amount".ljust(10) + "Status".ljust(10))
+        
+        # Orders
+        for i, order in enumerate(orders[-5:]):  # Show last 5 orders
+            if i >= ORDERS_WINDOW_HEIGHT - 3:  # Leave room for border and header
+                break
+                
+            order_id = order.get('orderId', 'N/A')[:10]
+            order_type = order.get('side', 'N/A')
+            price = f"${float(order.get('price', 0)):.2f}"
+            amount = f"{float(order.get('quantity', 0)):.4f}"
+            status = order.get('status', 'PENDING')
+            
+            color = curses.color_pair(1) if order_type == 'BUY' else curses.color_pair(2)
+            self.orders_win.addstr(i + 2, 2, 
+                                 f"{order_id:<12}{order_type:<6}{price:<12}{amount:<10}{status:<10}", 
+                                 color)
+        
+        self.orders_win.refresh()
+        if self.headless:
+            return
+            
+        self.orders_win.clear()
+        self.orders_win.box()
+        self.orders_win.addstr(0, 2, " Recent Orders ", curses.A_BOLD)
+        
+        if not orders:
+            self.orders_win.addstr(1, 2, "No active orders")
+        else:
+            for i, order in enumerate(orders[:ORDERS_WINDOW_HEIGHT-2]):
+                status = order.get('status', 'UNKNOWN')
+                color = (
+                    curses.color_pair(1) if status == 'FILLED' else
+                    curses.color_pair(2) if status == 'CANCELLED' else
+                    curses.color_pair(3)
+                )
+                self.orders_win.addstr(i+1, 2, f"{order.get('side')} {order.get('quantity')} @ ${order.get('price', 0):.4f}", color)
+        
+        self.orders_win.refresh()
+    
+    def _update_signals_window(self, signals: List[Dict[str, Any]]):
+        if not self.signals_win:
+            return
+            
+        self.signals_win.clear()
+        self.signals_win.box()
+        self.signals_win.addstr(0, 2, " Trading Signals ", curses.A_BOLD)
+        
+        if not signals:
+            self.signals_win.addstr(1, 2, "No signals yet")
+            self.signals_win.refresh()
+            return
+        
+        # Show last 4 signals
+        for i, signal in enumerate(signals[-4:]):
+            if i >= SIGNALS_WINDOW_HEIGHT - 2:
+                break
+                
+            signal_type = signal.get('type', 'UNKNOWN')
+            price = signal.get('price', 0.0)
+            confidence = signal.get('confidence', 0.0)
+            timestamp = signal.get('timestamp', '')
+            if isinstance(timestamp, str):
+                timestamp = datetime.fromisoformat(timestamp)
+            time_str = timestamp.strftime('%H:%M:%S')
+            
+            color = curses.color_pair(1) if signal_type == 'BUY' else curses.color_pair(2)
+            self.signals_win.addstr(i + 1, 2,
+                                  f"{time_str} | {signal_type:<4} @ ${price:<8.2f} | {confidence:.1%}",
+                                  color)
+        
+        self.signals_win.refresh()
+        if self.headless:
+            return
+            
+        self.signals_win.clear()
+        self.signals_win.box()
+        self.signals_win.addstr(0, 2, " Trading Signals ", curses.A_BOLD)
+        
+        for i, signal in enumerate(signals[:SIGNALS_WINDOW_HEIGHT-2]):
+            signal_type = signal.get('type', 'UNKNOWN')
+            color = (
+                curses.color_pair(1) if signal_type == 'BUY' else
+                curses.color_pair(2) if signal_type == 'SELL' else
+                curses.color_pair(3)
+            )
+            self.signals_win.addstr(i+1, 2, f"{signal_type}: {signal.get('reason', 'N/A')}", color)
+        
+        self.signals_win.refresh()
+    
+    def _print_headless_status(self, current_price: float, prediction_info: Dict[str, Any]):
+        """Print status updates in headless mode"""
+        status = "🟢 LIVE" if not self.engine.config.dry_run else "🟡 DRY RUN"
+        direction = prediction_info.get('direction', 'NEUTRAL')
+        confidence = prediction_info.get('confidence', 0.0)
+        
+        # Direction emoji
+        direction_emoji = "⬆️" if direction == 'UP' else "⬇️" if direction == 'DOWN' else "➡️"
+        
+        # Profit emoji
+        profit_emoji = "📈" if self.engine.total_profit >= 0 else "📉"
+        
+        print("\033[2J\033[H")  # Clear screen and move cursor to top
+        print(f"{HEADER} - {status}")
+        print("=" * 50)
+        print(f"Symbol: {self.engine.config.trading_params.symbol}")
+        print(f"Price: ${current_price:.4f}")
+        print(f"AI Prediction: {direction_emoji} {direction} ({confidence:.1%})")
+        print(f"Daily Trades: {self.engine.daily_trades}/{self.engine.config.trading_params.max_orders_per_day}")
+        print(f"Win/Loss: {self.engine.win_count}/{self.engine.loss_count}")
+        print(f"Total Profit: {profit_emoji} ${self.engine.total_profit:.2f}")
+        print("=" * 50)
+        print("\033[2J\033[H")  # Clear screen and move cursor to top
+        print(f"=== {HEADER} ===")
+        print(f"Symbol: {self.engine.config.trading_params.symbol}")
+        print(f"Mode: {'LIVE' if not self.engine.config.dry_run else 'DRY RUN'}")
+        print(f"Current Price: ${current_price:.4f}")
+        
+        if prediction_info:
+            direction = prediction_info.get('direction', 'NEUTRAL')
+            confidence = prediction_info.get('confidence', 0.0)
+            print(f"AI Signal: {direction} (Confidence: {confidence:.2%})")
+        
+        if self.engine.orders:
+            print("\nRecent Orders:")
+            for order in self.engine.orders[-3:]:
+                print(f"- {order.get('side')} {order.get('quantity')} @ ${order.get('price', 0):.4f}")
+        
+        print("=" * 50)
+    
+    async def start(self):
+        self._running = True
+        if not self.headless:
+            try:
+                self._init_curses()
+            except Exception as e:
+                logger.error(f"Failed to initialize curses UI: {e}")
+                self.headless = True
+        
+        try:
+            while self._running:
+                current_price = self.engine.last_price
+                prediction_info = self.engine.chronos.get_prediction_info() if hasattr(self.engine, 'chronos') else {}
+                
+                if current_price:
+                    self._update_status_window(current_price, prediction_info)
+                    self._update_orders_window(self.engine.orders)
+                    self._update_signals_window(self.engine.signals)
+                
+                await asyncio.sleep(self.engine.config.ai_config.update_interval)
+                
+        except KeyboardInterrupt:
+            self._running = False
+        finally:
+            if not self.headless:
+                self._cleanup_curses()
+            
+    async def stop(self):
+        self._running = False
+        if not self.headless:
+            self._cleanup_curses()
+
+def parse_args():
+    parser = argparse.ArgumentParser(description='MEXC Trading Bot')
+    parser.add_argument('--action', type=str, choices=['start', 'test-api'], default='start', help='Bot action')
+    parser.add_argument('--symbol', type=str, default='BTC_USDT', help='Trading pair symbol (e.g., BTC_USDT)')
+    parser.add_argument('--amount', type=float, default=10.0, help='Trading amount in USDT')
+    parser.add_argument('--dry-run', action='store_true', help='Run in dry-run mode (no real trades)')
+    parser.add_argument('--headless', action='store_true', help='Run without UI (logs only)')
+    return parser.parse_args()
+
+async def test_api():
+    config = load_config()
+    client = MexcClient(config.credentials)
+    
+    async with client:
+        print('=' * 100)
+        print('MEXC API TEST RESULTS')
+        print('=' * 100)
+        
+        try:
+            exchange_info = await client.get_exchange_info()
+            print(f'✓ Exchange info retrieved successfully')
+            print(f'✓ Server time synchronized')
+            
+            account = await client.get_account()
+            print(f'✓ Account access verified')
+            print(f'✓ Authentication successful')
+            
+        except Exception as e:
+            print(f'✗ API test failed: {e}')
+            sys.exit(1)
+        
+        print('\n✓ All tests passed successfully')
+
+async def main():
+    args = parse_args()
+    config = load_config()
+    
+    # Override config with CLI args
+    if args.symbol:
+        config.trading_params.symbol = args.symbol
+    if args.amount:
+        config.trading_params.trade_amount = args.amount
+    if args.dry_run:
+        config.trading_params.dry_run = True
+    if args.headless:
+        config.headless = True
+        
+    if args.action == 'test-api':
+        await test_api()
+        return
+        
+    # Initialize components
+    client = None
+    trading_engine = None
+    ui = None
+    
+    MAX_RETRIES = 3
+    retry_count = 0
+    last_error = None
+        
+    MAX_RETRIES = 3
+    retry_count = 0
+    last_error = None
+    
+    while retry_count < MAX_RETRIES:
+        try:
+            client = MexcClient(config.credentials)
+            trading_engine = TradingEngine(config, client)
+            ui = TradingBotUI(trading_engine, config.headless)
+            
+            # Initialize trading engine before setting up session
+            async with client:
+                try:
+                    await trading_engine.initialize()
+                    logger.info("Trading bot initialized successfully")
+                    
+                    if config.dry_run:
+                        logger.warning("Bot is running in DRY RUN mode - no real trades will be executed")
+                    
+                    # Start the UI first to see if it works
+                    try:
+                        if not config.headless:
+                            await ui.start()
+                    except Exception as ui_error:
+                        logger.warning(f"UI initialization failed: {str(ui_error)}")
+                        logger.info("Falling back to headless mode")
+                        config.headless = True
+                        ui = TradingBotUI(trading_engine, headless=True)
+                    
+                    # Now start both components
+                    await asyncio.gather(
+                        trading_engine.start(),
+                        ui.start()
+                    )
+                    # If we get here, everything worked
+                    break
+                except KeyboardInterrupt:
+                    logger.info("Shutting down gracefully...")
+                    break
+                    
+                except Exception as e:
+                    last_error = e
+                    retry_count += 1
+                    logger.error(f"Error in main loop (attempt {retry_count}/{MAX_RETRIES}): {str(e)}")
+                    if retry_count < MAX_RETRIES:
+                        logger.info(f"Retrying in 5 seconds...")
+                        await asyncio.sleep(5)
+                    continue
+                
+                finally:
+                    # Ensure clean shutdown
+                    if trading_engine:
+                        await trading_engine.stop()
+                    if ui:
+                        await ui.stop()
+                    
+        except Exception as e:
+            last_error = e
+            retry_count += 1
+            logger.error(f"Failed to initialize bot (attempt {retry_count}/{MAX_RETRIES}): {str(e)}")
+            if retry_count < MAX_RETRIES:
+                logger.info(f"Retrying in 5 seconds...")
+                await asyncio.sleep(5)
+    
+    if retry_count >= MAX_RETRIES:
+        logger.error(f"Bot failed to start after {MAX_RETRIES} attempts. Last error: {str(last_error)}")
+        sys.exit(1)
+        finally:
+            await asyncio.gather(
+                trading_engine.stop(),
+                ui.stop()
+            )
+    
+    try:
+        await trading_engine.initialize()
+        logger.info("Trading bot initialized successfully")
+        
+        if config.dry_run:
+            logger.warning("Bot is running in DRY RUN mode - no real trades will be executed")
+        
+        await asyncio.gather(
+            trading_engine.start(),
+            ui.start()
+        )
+    except KeyboardInterrupt:
+        logger.info("Shutting down...")
+    finally:
+        await asyncio.gather(
+            trading_engine.stop(),
+            ui.stop()
+        )
+
+if __name__ == "__main__":
+    if sys.platform == "win32":
+        sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'replace')
+        sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'replace')
+        os.environ['PYTHONIOENCODING'] = 'utf-8'
+    
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("\nShutting down gracefully...")

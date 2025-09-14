@@ -1,0 +1,65 @@
+    async def start(self):
+        """Start the UI loop"""
+        if not self.headless:
+            # Try to initialize curses UI
+            if not self._init_curses():
+                if self._retry_count < self.MAX_RETRIES:
+                    logger.info("Retrying UI initialization...")
+                    await asyncio.sleep(1)
+                    return await self.start()
+                else:
+                    logger.warning("Failed to initialize curses UI, falling back to headless mode")
+                    self.headless = True
+        
+        self._running = True
+        self._last_update = 0
+        
+        try:
+            while self._running and not self.engine._stop_event.is_set():
+                try:
+                    # Get current price with validation
+                    current_price = self.engine.last_price if self.engine.last_price is not None else 0.0
+                    
+                    # Get prediction with error handling
+                    try:
+                        prediction_info = self.engine.chronos.get_last_prediction()
+                    except Exception as e:
+                        logger.error(f"Error getting prediction: {e}")
+                        prediction_info = {
+                            'direction': 'NEUTRAL',
+                            'confidence': 0.0,
+                            'prediction': None,
+                            'error': str(e)
+                        }
+                    
+                    # Update UI with proper error handling
+                    if self.headless:
+                        self._print_headless_status(current_price, prediction_info)
+                    else:
+                        self._update_status_window(current_price, prediction_info)
+                        self._update_orders_window(self.engine.orders[-5:] if self.engine.orders else [])
+                        self._update_signals_window(self.engine.signals[-3:] if self.engine.signals else [])
+                except Exception as e:
+                    logger.error(f"Error updating display: {e}")
+                    if not self.headless:
+                        try:
+                            self.status_win.addstr(0, 2, f"Error: {str(e)[:50]}", curses.A_BOLD)
+                
+                await asyncio.sleep(1)  # Update frequency
+                
+        except Exception as e:
+            logger.error(f"Error in UI loop: {str(e)}")
+            if not self.headless:
+                # Try to recover by switching to headless mode
+                self.headless = True
+                await self.start()
+        
+        finally:
+            if not self.headless:
+                self._cleanup_curses()
+    
+    async def stop(self):
+        """Stop the UI loop"""
+        self._running = False
+        if not self.headless:
+            self._cleanup_curses()

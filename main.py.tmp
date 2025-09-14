@@ -1,0 +1,94 @@
+async def main():
+    args = parse_args()
+    config = load_config()
+    
+    # Override config with CLI args
+    if args.symbol:
+        config.trading_params.symbol = args.symbol
+    if args.amount:
+        config.trading_params.trade_amount = args.amount
+    if args.dry_run:
+        config.trading_params.dry_run = True
+    if args.headless:
+        config.headless = True
+        
+    if args.action == 'test-api':
+        await test_api()
+        return
+        
+    # Initialize components
+    client = None
+    trading_engine = None
+    ui = None
+    
+    MAX_RETRIES = 3
+    retry_count = 0
+    last_error = None
+    
+    while retry_count < MAX_RETRIES:
+        try:
+            # Create fresh instances for each attempt
+            client = MexcClient(config.credentials)
+            trading_engine = TradingEngine(config, client)
+            ui = TradingBotUI(trading_engine, config.headless)
+            
+            async with client:
+                # Initialize trading engine
+                await trading_engine.initialize()
+                logger.info("Trading bot initialized successfully")
+                
+                if config.dry_run:
+                    logger.warning("Bot is running in DRY RUN mode - no real trades will be executed")
+                
+                # Try UI initialization first
+                if not config.headless:
+                    try:
+                        await ui.start()
+                    except Exception as ui_error:
+                        logger.warning(f"UI initialization failed: {str(ui_error)}")
+                        logger.info("Falling back to headless mode")
+                        config.headless = True
+                        ui = TradingBotUI(trading_engine, headless=True)
+                
+                # Start both components
+                await asyncio.gather(
+                    trading_engine.start(),
+                    ui.start() if ui else asyncio.sleep(0)
+                )
+                # If we reach here, everything worked
+                break
+                
+        except KeyboardInterrupt:
+            logger.info("Received shutdown signal, cleaning up...")
+            break
+            
+        except Exception as e:
+            last_error = e
+            retry_count += 1
+            logger.error(f"Error in main loop (attempt {retry_count}/{MAX_RETRIES}): {str(e)}")
+            
+            if retry_count < MAX_RETRIES:
+                logger.info(f"Retrying in 5 seconds...")
+                await asyncio.sleep(5)
+            continue
+            
+        finally:
+            # Clean shutdown of components
+            if trading_engine:
+                await trading_engine.stop()
+            if ui:
+                await ui.stop()
+    
+    if retry_count >= MAX_RETRIES:
+        logger.error(f"Bot failed to start after {MAX_RETRIES} attempts")
+        logger.error(f"Last error: {str(last_error)}")
+        sys.exit(1)
+
+if __name__ == '__main__':
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("\nBot shutdown complete")
+    except Exception as e:
+        logger.error(f"Fatal error: {str(e)}")
+        sys.exit(1)

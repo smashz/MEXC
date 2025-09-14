@@ -1,0 +1,112 @@
+#!/usr/bin/env python3
+import asyncio
+import sys
+import os
+import curses
+import argparse
+from typing import Optional, Dict, Any, List
+from datetime import datetime
+import logging_config  # Initialize logging
+from loguru import logger
+from config import load_config, BotConfig
+from mexc_client import MexcClient
+from trading_engine import TradingEngine
+
+# Constants for UI
+HEADER = "MEXC⚡ Trading Bot"
+MIN_TERMINAL_WIDTH = 80
+MIN_TERMINAL_HEIGHT = 24
+
+class TradingBotUI:
+    def __init__(self, engine: TradingEngine, headless: bool = False):
+        self.engine = engine
+        self.headless = headless
+        self.stdscr = None
+        self._running = False
+        self._curses_failed = False
+        self._retry_count = 0
+        self.MAX_RETRIES = 3
+        self._last_update = datetime.now()
+        self.status = "Initializing..."
+        self.paused = False
+        self._update_interval = getattr(engine.config.trading_params, 'ui_update_interval', 1.0)
+        self._last_check = {}  # Track last check times for different components
+        self._last_env_mtime = os.path.getmtime('.env')  # Track .env file modification time
+        
+    def _check_config_changes(self) -> bool:
+        """Check if .env file has been modified and reload config if needed"""
+        try:
+            current_mtime = os.path.getmtime('.env')
+            if current_mtime != self._last_env_mtime:
+                logger.info("Detected .env file changes, reloading configuration...")
+                self._last_env_mtime = current_mtime
+                return True
+            return False
+        except Exception as e:
+            logger.error(f"Error checking .env modification time: {e}")
+            return False
+            
+    async def start(self):
+        """Start the UI loop"""
+        if not self.headless:
+            # Try to initialize curses UI
+            if not self._init_curses():
+                if self._retry_count < self.MAX_RETRIES:
+                    logger.info("Retrying UI initialization...")
+                    await asyncio.sleep(1)
+                    return await self.start()
+                else:
+                    logger.warning("Failed to initialize curses UI, falling back to headless mode")
+                    self.headless = True
+        
+        self._running = True
+        self._last_update = 0
+        
+        try:
+            while self._running and not self.engine._stop_event.is_set():
+                try:
+                    # Check for config changes
+                    if self._check_config_changes():
+                        await self.engine.reload_config()
+                        logger.info("Configuration reloaded successfully")
+                        
+                    # Get current price with validation
+                    current_price = self.engine.last_price if self.engine.last_price is not None else 0.0
+                    
+                    # Get prediction with error handling
+                    try:
+                        prediction_info = self.engine.chronos.get_last_prediction()
+                    except Exception as e:
+                        logger.error(f"Error getting prediction: {e}")
+                        prediction_info = {
+                            'direction': 'NEUTRAL',
+                            'confidence': 0.0,
+                            'prediction': None,
+                            'error': str(e)
+                        }
+                    
+                    # Update UI with proper error handling
+                    if self.headless:
+                        self._print_headless_status(current_price, prediction_info)
+                    else:
+                        self._update_status_window(current_price, prediction_info)
+                        self._update_orders_window(self.engine.orders[-5:] if self.engine.orders else [])
+                        self._update_signals_window(self.engine.signals[-3:] if self.engine.signals else [])
+                except Exception as e:
+                    logger.error(f"Error updating display: {e}")
+                    if not self.headless:
+                        try:
+                            self.status_win.addstr(0, 2, f"Error: {str(e)[:50]}", curses.A_BOLD)
+                
+                await asyncio.sleep(1)  # Update frequency
+                
+        except Exception as e:
+            logger.error(f"Error in UI loop: {str(e)}")
+            if not self.headless:
+                # Try to recover by switching to headless mode
+                self.headless = True
+                await self.start()
+        
+        finally:
+            if not self.headless:
+                self._cleanup_curses()

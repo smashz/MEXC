@@ -1,11 +1,13 @@
-import time
 import pytz
 import asyncio
+import numpy as np
+import time
 from datetime import datetime, timedelta
 from typing import Dict, Any, Optional, List, Tuple
 from loguru import logger
 from mexc_client import MexcClient
-from config import BotConfig, TimeWindow
+from config import BotConfig, TimeWindow, AIConfig
+from chronos_strategy import ChronosTradingStrategy
 
 class TradingEngine:
     """High-performance trading engine with stop-loss, time windows, and order management"""
@@ -13,6 +15,259 @@ class TradingEngine:
     def __init__(self, config: BotConfig, client: MexcClient):
         self.config = config
         self.client = client
+        self.chronos = ChronosTradingStrategy(config)  # Initialize with config
+        self.last_signal = None
+        self.last_price = None
+        self.historical_prices = []
+        self._running = False
+        self._stop_event = asyncio.Event()
+        self.ui_update_callback = None
+        # Trading state
+        self.positions = {}  # Dictionary to store positions by order ID
+        self.orders = []
+        self.signals = []
+        self.daily_trades = 0
+        self.daily_order_count = 0  # Track daily order count
+        
+        # Rate limiting and updates
+        self._last_price_update = 0
+        self._last_klines = []
+        self._last_signal_time = 0
+        self._min_signal_interval = 60  # Minimum seconds between signals
+        
+        # Performance metrics
+        self.total_profit = 0.0
+        self.win_count = 0
+        self.loss_count = 0
+        
+    async def reload_config(self):
+        """Reload configuration from .env and reinitialize components"""
+        from config import load_config
+        try:
+            # Load fresh config from .env
+            new_config = load_config()
+            old_symbol = self.config.trading_params.symbol
+            
+            # Standardize both old and new symbols
+            old_symbol_std = self._standardize_symbol(old_symbol)
+            new_symbol_std = self._standardize_symbol(new_config.trading_params.symbol)
+            new_config.trading_params.symbol = new_symbol_std
+            
+            # Update config
+            self.config = new_config
+            
+            if old_symbol_std != new_symbol_std:
+                logger.info(f"Trading symbol changed from {old_symbol_std} to {new_symbol_std}")
+                # Reinitialize strategy with new config
+                self.chronos = ChronosTradingStrategy(new_config)
+                
+                # Clear all historical data and state
+                self.historical_prices = []
+                self._last_klines = []
+                self.last_price = None
+                self.last_signal = None
+                self.positions = {}  # Clear any tracked positions
+                self.signals = []    # Clear signal history
+                
+                # Reset trading metrics for new symbol
+                self.daily_trades = 0
+                self.total_profit = 0.0
+                self.win_count = 0
+                self.loss_count = 0
+                
+                # Reinitialize with new symbol
+                await self.initialize()
+                logger.info(f"Trading engine reinitialized with new symbol: {new_symbol_std}")
+            else:
+                # Update the strategy config even if symbol hasn't changed
+                self.chronos.config = new_config
+                logger.info(f"Configuration updated, symbol unchanged: {new_symbol_std}")
+            
+            return True
+        except Exception as e:
+            logger.error(f"Error reloading configuration: {str(e)}")
+            logger.debug(f"Stack trace:", exc_info=True)
+            return False
+        
+    def _standardize_symbol(self, symbol: str) -> str:
+        """Standardize symbol format to MEXC's requirements"""
+        # Remove any existing underscore
+        symbol = symbol.replace("_", "")
+        # If the symbol doesn't contain USDT, we assume it's a USDT pair
+        if "USDT" not in symbol.upper():
+            symbol = f"{symbol}USDT"
+        return symbol.upper()
+    
+    async def initialize(self):
+        """Initialize the trading engine and load historical data"""
+        logger.info("Initializing trading engine...")
+        
+        try:
+            # Standardize symbol format
+            raw_symbol = self.config.trading_params.symbol
+            self.config.trading_params.symbol = self._standardize_symbol(raw_symbol)
+            logger.debug(f"Standardized symbol: {raw_symbol} -> {self.config.trading_params.symbol}")
+            
+            # Ensure client is initialized
+            if not self.client or not self.client.session:
+                logger.error("API client not properly initialized")
+                return False
+                
+            logger.debug("Client and session are properly initialized")
+                
+            # Test API connection
+            logger.info("Testing API connection...")
+            try:
+                await self.client.get_klines(
+                    symbol=self.config.trading_params.symbol,
+                    interval=self.config.ai_config.timeframe,
+                    limit=1
+                )
+            except Exception as e:
+                logger.error(f"API connection test failed: {e}")
+                return False
+                
+            # Fetch historical data with timeout
+            async with asyncio.timeout(30):  # 30 second timeout
+                if not await self._fetch_historical_data():
+                    logger.error("Failed to initialize historical data")
+                    return False
+            
+            logger.info("Trading engine initialized successfully")
+            self._running = True
+            return True
+            
+        except asyncio.TimeoutError:
+            logger.error("Initialization timed out while waiting for data")
+            return False
+        except Exception as e:
+            logger.error(f"Failed to initialize trading engine: {e}")
+            return False
+            
+    async def run_strategy(self):
+        """Main strategy loop that updates AI model and generates trading signals"""
+        while self._running and not self._stop_event.is_set():
+            try:
+                # Check trading time window
+                if not await self.is_trading_time():
+                    logger.info("Outside trading hours, waiting...")
+                    await asyncio.sleep(60)
+                    continue
+                
+                # Rate limiting
+                current_time = time.time()
+                if current_time - self._last_signal_time < self._min_signal_interval:
+                    await asyncio.sleep(1)
+                    continue
+                
+                # Update price and model with timeout
+                try:
+                    async with asyncio.timeout(10):  # 10 second timeout for price updates
+                        current_price = await self.get_current_price(self.config.trading_params.symbol)
+                        if not current_price:
+                            logger.warning("No current price available")
+                            await asyncio.sleep(5)
+                            continue
+                        
+                        logger.debug(f"Got current price: {current_price}")
+                        self.last_price = current_price
+                        self.chronos.update_data(current_price)
+                        
+                        # Generate AI prediction and trading signal
+                        prediction_info = self.chronos.get_last_prediction()
+                        signal = prediction_info['direction']  # The direction is our signal
+                        
+                        # Process signal if confidence threshold is met
+                        if prediction_info.get('confidence', 0) >= self.config.ai_config.confidence_threshold:
+                            logger.info(f"Signal generated: {signal} (confidence: {prediction_info.get('confidence', 0):.2f})")
+                            
+                            # Record signal
+                            signal_record = {
+                                'type': signal,
+                                'price': current_price,
+                                'confidence': prediction_info['confidence'],
+                                'direction': prediction_info.get('direction'),
+                                'timestamp': datetime.now().isoformat()
+                            }
+                            self.signals.append(signal_record)
+                            
+                            # Execute trade
+                            if not self.config.dry_run:
+                                await self._execute_signal_trade(signal, current_price)
+                            else:
+                                logger.info(f"[DRY RUN] Would execute {signal} trade at {current_price}")
+                            
+                            # Update UI
+                            if self.ui_update_callback:
+                                await self.ui_update_callback(current_price, prediction_info)
+                            
+                            self.last_signal = signal
+                            self._last_signal_time = current_time
+                        
+                except asyncio.TimeoutError:
+                    logger.error("Timeout while fetching current price")
+                    await asyncio.sleep(5)
+                    continue
+                except Exception as e:
+                    logger.error(f"Error processing signal: {str(e)}")
+                    await asyncio.sleep(5)
+                    continue
+                
+                # Sleep before next update
+                await asyncio.sleep(self.config.ai_config.update_interval)
+                
+            except Exception as e:
+                logger.error(f"Error in trading loop: {str(e)}")
+                await asyncio.sleep(5)
+                
+    async def _fetch_historical_data(self):
+        """Fetch historical price data for initialization"""
+        retry_count = 0
+        max_retries = 3
+        
+        while retry_count < max_retries:
+            try:
+                logger.info(f"Fetching historical data (attempt {retry_count + 1}/{max_retries})...")
+                klines = await self.client.get_klines(
+                    symbol=self.config.trading_params.symbol,
+                    interval=self.config.ai_config.timeframe,
+                    limit=self.config.ai_config.max_historical_data
+                )
+                
+                if not klines:
+                    logger.warning("No historical data received")
+                    retry_count += 1
+                    await asyncio.sleep(2)
+                    continue
+                
+                logger.info(f"Received {len(klines)} historical price points")
+                self._last_klines = klines
+                self.historical_prices = []
+                
+                for kline in klines:
+                    try:
+                        close_price = float(kline[4])  # Close price
+                        self.historical_prices.append(close_price)
+                        self.chronos.update_data(close_price)
+                    except (IndexError, ValueError) as e:
+                        logger.error(f"Invalid kline data format: {e}")
+                        continue
+                
+                if self.historical_prices:
+                    return True
+                logger.error("No valid prices in historical data")
+                return False
+                
+            except Exception as e:
+                logger.error(f"Error fetching historical data: {e}")
+                retry_count += 1
+                if retry_count < max_retries:
+                    await asyncio.sleep(2)
+                    
+        logger.error("Failed to fetch historical data after max retries")
+        return False
+        
+        logger.info("Trading engine initialized successfully")
         self.positions: Dict[str, Dict[str, Any]] = {}
         self.daily_order_count = 0
         self.last_reset_date = datetime.now().date()
@@ -114,6 +369,102 @@ class TradingEngine:
             logger.error(f"Failed to get current price for {symbol}: {str(e)}")
             raise
     
+    async def update_strategy(self):
+        """Update the Chronos trading strategy with latest market data"""
+        try:
+            # Get current market data
+            symbol = self.config.trading_params.symbol
+            logger.debug(f"Fetching current price for {symbol}")
+            
+            ticker = await self.client.get_ticker_price(symbol)
+            logger.debug(f"Received ticker response: {ticker}")
+            
+            current_price = float(ticker.get('price', 0))
+            logger.debug(f"Parsed current price: {current_price}")
+            
+            if not current_price:
+                logger.warning("Got zero or invalid price from ticker")
+                return None
+                
+            self.last_price = current_price
+            self.chronos.update_data(current_price)
+            
+            # Generate predictions and signals
+            prediction = self.chronos.get_last_prediction()
+            signal = prediction.get('direction', 'NEUTRAL')
+            
+            # Update signal history
+            self.signals.append({
+                "type": signal,
+                "price": current_price,
+                "confidence": prediction.get("confidence", 0),
+                "reason": f"Signal:{prediction.get('direction')} Conf:{prediction.get('confidence', 0):.1%}",
+                "timestamp": datetime.now()
+            })
+            
+            # Keep signal list manageable
+            if len(self.signals) > 100:
+                self.signals = self.signals[-100:]
+            
+            # Execute trades if conditions are met
+            if not self.config.dry_run and signal != self.last_signal:
+                await self._execute_signal_trade(signal, current_price)
+            
+            self.last_signal = signal
+            return prediction
+            
+        except Exception as e:
+            logger.error(f"Error updating strategy: {e}")
+            return None
+            
+    async def _execute_signal_trade(self, signal: str, price: float) -> None:
+        """Execute trades based on strategy signals"""
+        try:
+            if signal == "BUY" and self.daily_trades < self.config.trading_params.max_trades_per_day:
+                # Calculate position size
+                quantity = self.config.trading_params.quantity
+                
+                # Place buy order
+                order = await self.place_limit_buy_order(price, quantity)
+                if order:
+                    self.orders.append(order)
+                    self.daily_trades += 1
+                    
+            elif signal == "SELL" and self.positions:
+                # Close any open positions
+                for position in self.positions:
+                    await self.place_limit_sell_order(
+                        price,
+                        position.get("quantity"),
+                        position.get("order_id")
+                    )
+                    
+        except Exception as e:
+            logger.error(f"Error executing trade for signal {signal}: {e}")
+            
+    async def _check_daily_reset(self):
+        """Reset daily trade counter at UTC midnight"""
+        now = datetime.now()
+        if now.hour == 0 and now.minute == 0:
+            self.daily_trades = 0
+    
+    async def start(self):
+        """Start the trading engine"""
+        self._running = True
+        while self._running:
+            try:
+                if await self.is_trading_time():
+                    await self.update_strategy()
+                await asyncio.sleep(self.config.ai_config.update_interval)
+            except Exception as e:
+                logger.error(f"Error in trading loop: {e}")
+                await asyncio.sleep(5)  # Back off on error
+                
+    async def stop(self):
+        """Stop the trading engine"""
+        self._running = False
+        self._stop_event.set()
+    
     async def place_limit_buy_order(self, price: float, quantity: Optional[float] = None) -> Optional[Dict[str, Any]]:
         """Place a limit buy order with automatic stop loss using MEXC's integrated approach"""
         if not await self.is_trading_time():
@@ -198,6 +549,10 @@ class TradingEngine:
         
         if not self._can_place_order():
             logger.warning("Daily order limit reached, skipping sell order")
+            return None
+            
+        if len(self.positions) >= self.config.trading_params.max_orders_per_day:
+            logger.warning("Maximum number of concurrent positions reached")
             return None
         
         symbol = self.config.trading_params.symbol
@@ -325,6 +680,11 @@ class TradingEngine:
     async def monitor_positions(self):
         """Monitor all active positions for stop-loss triggers and bracket completion"""
         logger.info("Starting position monitoring...")
+        
+        # Ensure positions attribute exists
+        if not hasattr(self, 'positions'):
+            logger.warning("positions attribute not found, initializing empty dictionary")
+            self.positions = {}
         
         while True:
             try:

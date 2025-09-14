@@ -18,4 +18,15 @@ TRADING_TIMEZONE=UTC            # America/New_York
 # Bot Configuration
 DRY_RUN=true                    # false
 LOG_LEVEL=INFO
-RATE_LIMIT_RPS=10.0 
+RATE_LIMIT_RPS=10.0
+
+# AI Model Configuration
+MODEL_PATH=amazon/chronos-t5-small
+PREDICTION_LENGTH=12            # Number of periods to predict
+LOOKBACK_PERIODS=24            # Number of periods to look back
+MAX_HISTORICAL_DATA=1000       # Maximum historical data points to store
+CONFIDENCE_THRESHOLD=0.65      # Minimum confidence threshold for AI predictions (0.1-1.0)
+MIN_TREND_STRENGTH=0.4        # Minimum trend strength threshold (0.1-1.0)
+UPDATE_INTERVAL=300           # Model update interval in seconds
+FEATURE_COLUMNS=close,volume,high,low  # Features to use for prediction, comma-separated
+TARGET_COLUMN=close           # Target column for prediction

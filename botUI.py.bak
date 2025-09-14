@@ -1,0 +1,474 @@
+import time
+import curses
+from datetime import datetime, timedelta
+import pandas as pd
+import sys
+import asyncio
+from config import load_config, BotConfig
+from mexc_client import MexcClient
+from chronos_strategy import ChronosTradingStrategy
+from trading_engine import TradingEngine
+
+# Deprecation warning
+import warnings
+warnings.warn(
+    "botUI.py is deprecated. Please use main.py with --headless flag for terminal UI. "
+    "This module will be removed in a future version.",
+    DeprecationWarning
+)
+
+
+class TradingStrategy:
+    def __init__(self, fast_period, slow_period):
+        self.fast_period = fast_period
+        self.slow_period = slow_period
+        
+    def calculate_indicators(self, klines):
+        """Calculate technical indicators from klines data"""
+        if not klines or len(klines) == 0:
+            return pd.DataFrame()
+            
+        # MEXC klines format: [timestamp, open, high, low, close, volume, close_time, quote_volume]
+        df = pd.DataFrame(klines, columns=[
+            'timestamp', 'open', 'high', 'low', 'close', 'volume', 'close_time', 'quote_volume'
+        ])
+        
+        # Convert to numeric values
+        for col in ['open', 'high', 'low', 'close', 'volume']:
+            df[col] = pd.to_numeric(df[col], errors='coerce')
+        
+        # Drop any rows with NaN values
+        df = df.dropna()
+        
+        if len(df) < self.slow_period:
+            return pd.DataFrame()
+            
+        # Calculate moving averages
+        df['fast_ma'] = df['close'].rolling(window=self.fast_period).mean()
+        df['slow_ma'] = df['close'].rolling(window=self.slow_period).mean()
+        
+        return df
+        
+    def generate_signal(self, df):
+        """Generate buy/sell signals based on moving average crossover"""
+        if df.empty or len(df) < 2:
+            return 'HOLD'
+            
+        # Get the last two data points
+        prev_fast = df['fast_ma'].iloc[-2]
+        prev_slow = df['slow_ma'].iloc[-2]
+        current_fast = df['fast_ma'].iloc[-1]
+        current_slow = df['slow_ma'].iloc[-1]
+        
+        # Check for crossover
+        if prev_fast <= prev_slow and current_fast > current_slow:
+            return 'BUY'
+        elif prev_fast >= prev_slow and current_fast < current_slow:
+            return 'SELL'
+        else:
+            return 'HOLD'
+
+class AITradingBot:
+    def __init__(self, stdscr=None):
+        self.api = MexcAPI(API_KEY, SECRET_KEY)
+        try:
+            self.chronos_strategy = ChronosTradingStrategy()
+        except Exception as e:
+            print(f"Failed to initialize AI strategy: {e}")
+            print("Using statistical fallback mode")
+            # Fallback to a simple strategy if Chronos fails
+            self.chronos_strategy = self.create_fallback_strategy()
+        self.ma_strategy = TradingStrategy(FAST_MA_PERIOD, SLOW_MA_PERIOD)
+        self.position = None
+        self.entry_price = 0
+        self.trade_count = 0
+        self.max_trades = MAX_TRADES_PER_DAY
+        self.stdscr = stdscr
+        self.status = "Initializing..."
+        self.last_update = datetime.now()
+        self.paused = False
+        self.last_trade_date = datetime.now().date()
+        self.headless_mode = False
+    
+    def create_fallback_strategy(self):
+        """Create a simple fallback strategy if Chronos fails to load"""
+        class FallbackStrategy:
+            def __init__(self):
+                self.historical_data = []
+                
+            def update_data(self, new_price):
+                self.historical_data.append(new_price)
+                if len(self.historical_data) > MAX_HISTORICAL_DATA:
+                    self.historical_data = self.historical_data[-MAX_HISTORICAL_DATA:]
+            
+            def generate_signal(self):
+                if len(self.historical_data) < 10:
+                    return "HOLD"
+                
+                # Simple momentum-based strategy
+                current = self.historical_data[-1]
+                previous = self.historical_data[-2] if len(self.historical_data) >= 2 else current
+                
+                if current > previous * 1.001:  # 0.1% increase
+                    return "BUY"
+                elif current < previous * 0.999:  # 0.1% decrease
+                    return "SELL"
+                else:
+                    return "HOLD"
+            
+            def get_prediction_info(self):
+                return {"predictions": [], "confidence": 0, "trend": "neutral"}
+        
+        return FallbackStrategy()
+        
+    def update_display(self, current_price, ma_signal, ai_signal, prediction_info):
+        """Update the console display with current information"""
+        if not self.stdscr:
+            return
+            
+        self.stdscr.clear()
+        height, width = self.stdscr.getmaxyx()
+        
+        # Header
+        self.stdscr.addstr(0, 0, "🚀 MEXC AI Trading Bot", curses.A_BOLD)
+        self.stdscr.addstr(1, 0, "=" * min(80, width-1))
+        
+        # Status with colored indicators
+        status = "PAUSED" if self.paused else self.status
+        status_color = curses.color_pair(3) if self.paused else curses.color_pair(2) if status == "RUNNING" else curses.color_pair(4)
+        status_icon = "⏸️ " if self.paused else "🟢" if status == "RUNNING" else "🟡"
+        
+        self.stdscr.addstr(2, 0, f"Status: {status_icon} {status}", status_color)
+        self.stdscr.addstr(3, 0, f"Last Update: {self.last_update.strftime('%H:%M:%S')}")
+        
+        # Market Data
+        self.stdscr.addstr(5, 0, "📊 Market Data:")
+        self.stdscr.addstr(6, 0, f"  Symbol: {SYMBOL}")
+        self.stdscr.addstr(7, 0, f"  Current Price: ${current_price:.2f}")
+        
+        # AI Predictions
+        self.stdscr.addstr(9, 0, "🤖 AI Predictions:")
+        if prediction_info and prediction_info["predictions"]:
+            self.stdscr.addstr(10, 0, f"  Trend: {prediction_info['trend'].upper()}")
+            self.stdscr.addstr(11, 0, f"  Confidence: {prediction_info['confidence']*100:.1f}%")
+            self.stdscr.addstr(12, 0, f"  Predicted: ${prediction_info['predicted_price']:.2f}")
+            self.stdscr.addstr(13, 0, f"  Change: {prediction_info['price_change_pct']*100:+.1f}%")
+        else:
+            self.stdscr.addstr(10, 0, "  No predictions available")
+        
+        # Trading Info
+        self.stdscr.addstr(15, 0, "💼 Trading Info:")
+        position_status = f"{self.position} @ ${self.entry_price:.2f}" if self.position else "None"
+        self.stdscr.addstr(16, 0, f"  Position: {position_status}")
+        self.stdscr.addstr(17, 0, f"  Today's Trades: {self.trade_count}/{self.max_trades}")
+        
+        # Signals
+        self.stdscr.addstr(19, 0, "📶 Signals:")
+        ai_color = curses.color_pair(2) if ai_signal == 'BUY' else curses.color_pair(3) if ai_signal == 'SELL' else 0
+        ma_color = curses.color_pair(2) if ma_signal == 'BUY' else curses.color_pair(3) if ma_signal == 'SELL' else 0
+        
+        self.stdscr.addstr(20, 0, f"  AI Signal: {ai_signal}", ai_color)
+        self.stdscr.addstr(21, 0, f"  MA Signal: {ma_signal}", ma_color)
+        
+        # Controls
+        self.stdscr.addstr(23, 0, "⌨️  Controls: Q=Quit, R=Reset, P=Pause/Resume")
+        
+        self.stdscr.refresh()
+        
+    def print_headless_status(self, current_price, ma_signal, ai_signal, prediction_info):
+        """Print status information in headless mode"""
+        # Clear console (works on most terminals)
+        print("\033[H\033[J", end="")
+        
+        # Header
+        print("🚀 MEXC AI Trading Bot (Headless Mode)")
+        print("=" * 50)
+        
+        # Status with icons
+        status = "PAUSED" if self.paused else self.status
+        status_icon = "⏸️ " if self.paused else "🟢" if status == "RUNNING" else "🟡"
+        
+        print(f"Status: {status_icon} {status}")
+        print(f"Last Update: {self.last_update.strftime('%H:%M:%S')}")
+        print()
+        
+        # Market Data
+        print("📊 Market Data:")
+        print(f"  Symbol: {SYMBOL}")
+        print(f"  Current Price: ${current_price:.2f}")
+        print()
+        
+        # AI Predictions
+        print("🤖 AI Predictions:")
+        if prediction_info and prediction_info["predictions"]:
+            print(f"  Trend: {prediction_info['trend'].upper()}")
+            print(f"  Confidence: {prediction_info['confidence']*100:.1f}%")
+            print(f"  Predicted: ${prediction_info['predicted_price']:.2f}")
+            print(f"  Change: {prediction_info['price_change_pct']*100:+.1f}%")
+        else:
+            print("  No predictions available")
+        print()
+        
+        # Trading Info
+        print("💼 Trading Info:")
+        position_status = f"{self.position} @ ${self.entry_price:.2f}" if self.position else "None"
+        print(f"  Position: {position_status}")
+        print(f"  Today's Trades: {self.trade_count}/{self.max_trades}")
+        print()
+        
+        # Signals
+        print("📶 Signals:")
+        print(f"  AI Signal: {ai_signal}")
+        print(f"  MA Signal: {ma_signal}")
+        print()
+        print("Press Ctrl+C to stop the bot")
+        print("-" * 50)
+        
+    def get_current_price(self):
+        """Get current price of the trading pair"""
+        ticker = self.api.get_ticker_price(SYMBOL)
+        if ticker and 'price' in ticker:
+            return float(ticker['price'])
+        return None
+        
+    def check_risk_management(self, current_price):
+        """Check if stop loss or take profit conditions are met"""
+        if self.position == 'LONG':
+            profit_pct = (current_price - self.entry_price) / self.entry_price
+            if profit_pct <= -STOP_LOSS_PCT:
+                return 'SELL'
+            elif profit_pct >= TAKE_PROFIT_PCT:
+                return 'SELL'
+                
+        elif self.position == 'SHORT':
+            profit_pct = (self.entry_price - current_price) / self.entry_price
+            if profit_pct <= -STOP_LOSS_PCT:
+                return 'BUY'
+            elif profit_pct >= TAKE_PROFIT_PCT:
+                return 'BUY'
+                
+        return 'HOLD'
+        
+    def execute_trade(self, signal, current_price):
+        """Execute a trade based on the signal (test version)"""
+        if signal == 'BUY' and self.position != 'LONG':
+            if self.position == 'SHORT':
+                self.status = f"WOULD CLOSE SHORT at ${current_price:.2f}"
+                print(f"{datetime.now()}: {self.status}")
+            
+            self.status = f"WOULD BUY at ${current_price:.2f}"
+            print(f"{datetime.now()}: {self.status}")
+            self.position = 'LONG'
+            self.entry_price = current_price
+            self.trade_count += 1
+                
+        elif signal == 'SELL' and self.position != 'SHORT':
+            if self.position == 'LONG':
+                self.status = f"WOULD CLOSE LONG at ${current_price:.2f}"
+                print(f"{datetime.now()}: {self.status}")
+            
+            self.status = f"WOULD SELL at ${current_price:.2f}"
+            print(f"{datetime.now()}: {self.status}")
+            self.position = 'SHORT'
+            self.entry_price = current_price
+            self.trade_count += 1
+            
+    def run_curses(self, stdscr):
+        """Main trading loop with curses interface"""
+        self.stdscr = stdscr
+        curses.curs_set(0)
+        curses.start_color()
+        curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_BLACK)  # Default
+        curses.init_pair(2, curses.COLOR_GREEN, curses.COLOR_BLACK)  # Buy/Running
+        curses.init_pair(3, curses.COLOR_RED, curses.COLOR_BLACK)    # Sell/Paused
+        curses.init_pair(4, curses.COLOR_YELLOW, curses.COLOR_BLACK) # Initializing
+        
+        stdscr.nodelay(True)
+        stdscr.timeout(100)  # Refresh every 100ms for better responsiveness
+        
+        # Set initial status to RUNNING
+        self.status = "RUNNING"
+        
+        while True:
+            # Check for user input
+            try:
+                key = stdscr.getch()
+                if key == ord('q') or key == ord('Q'):
+                    break
+                elif key == ord('p') or key == ord('P'):
+                    self.paused = not self.paused
+                    self.status = "PAUSED" if self.paused else "RUNNING"
+                    print(f"{datetime.now()}: Bot {'paused' if self.paused else 'resumed'}")
+                elif key == ord('r') or key == ord('R'):
+                    self.position = None
+                    self.entry_price = 0
+                    self.status = "Reset position"
+                    print(f"{datetime.now()}: Position reset")
+                    # Reset status to running after a short delay
+                    curses.napms(1000)
+                    self.status = "RUNNING"
+            except:
+                pass
+                
+            # Reset trade count at midnight
+            current_date = datetime.now().date()
+            if current_date != self.last_trade_date:
+                self.trade_count = 0
+                self.last_trade_date = current_date
+                print(f"New trading day: {current_date}")
+                
+            # Get current market data (even when paused)
+            current_price = self.get_current_price()
+            if current_price is None:
+                time.sleep(2)
+                continue
+                
+            # Update AI strategy with latest price
+            self.chronos_strategy.update_data(current_price)
+            
+            # Get klines for MA strategy
+            klines = self.api.get_klines(SYMBOL, TIMEFRAME, MAX_HISTORICAL_DATA)
+            if not klines:
+                time.sleep(2)
+                continue
+                
+            # Generate signals
+            df = self.ma_strategy.calculate_indicators(klines)
+            ma_signal = self.ma_strategy.generate_signal(df) if not df.empty else 'HOLD'
+            ai_signal = self.chronos_strategy.generate_signal()
+            prediction_info = self.chronos_strategy.get_prediction_info()
+            
+            if not self.paused:
+                # Check risk management
+                risk_signal = self.check_risk_management(current_price)
+                
+                # Determine final signal (prioritize risk management)
+                if risk_signal != 'HOLD':
+                    final_signal = risk_signal
+                    self.status = f"Risk management triggered: {risk_signal}"
+                elif ai_signal != 'HOLD' and self.trade_count < self.max_trades:
+                    final_signal = ai_signal
+                    self.status = f"AI signal: {ai_signal}"
+                else:
+                    final_signal = 'HOLD'
+                    # Reset status to RUNNING if no special status
+                    if not self.status.startswith("WOULD") and not self.status.startswith("Risk"):
+                        self.status = "RUNNING"
+                
+                # Execute trade if needed
+                if final_signal != 'HOLD':
+                    self.execute_trade(final_signal, current_price)
+            
+            self.last_update = datetime.now()
+            
+            # Update display
+            self.update_display(current_price, ma_signal, ai_signal, prediction_info)
+            
+            # Small delay to prevent high CPU usage
+            curses.napms(100)
+
+    def run_headless(self):
+        """Run the bot without a display (for servers)"""
+        self.headless_mode = True
+        print("Starting MEXC AI Trading Bot in headless mode...")
+        print(f"Trading pair: {SYMBOL}")
+        print(f"Trade amount: {TRADE_AMOUNT}")
+        print(f"Strategy: Statistical Forecasting")
+        
+        # Set initial status
+        self.status = "RUNNING"
+        
+        while True:
+            # Reset trade count at midnight
+            current_date = datetime.now().date()
+            if current_date != self.last_trade_date:
+                self.trade_count = 0
+                self.last_trade_date = current_date
+                print(f"New trading day: {current_date}")
+                
+            try:
+                # Get current market data
+                current_price = self.get_current_price()
+                if current_price is None:
+                    print(f"{datetime.now()}: Failed to get price data, retrying...")
+                    time.sleep(2)
+                    continue
+                    
+                # Update AI strategy with latest price
+                self.chronos_strategy.update_data(current_price)
+                
+                # Get klines for MA strategy
+                klines = self.api.get_klines(SYMBOL, TIMEFRAME, MAX_HISTORICAL_DATA)
+                if not klines:
+                    print(f"{datetime.now()}: Failed to get klines data, retrying...")
+                    time.sleep(2)
+                    continue
+                    
+                # Generate signals
+                df = self.ma_strategy.calculate_indicators(klines)
+                ma_signal = self.ma_strategy.generate_signal(df) if not df.empty else 'HOLD'
+                ai_signal = self.chronos_strategy.generate_signal()
+                prediction_info = self.chronos_strategy.get_prediction_info()
+                
+                # Display status information
+                self.print_headless_status(current_price, ma_signal, ai_signal, prediction_info)
+                
+                if not self.paused:
+                    # Check risk management
+                    risk_signal = self.check_risk_management(current_price)
+                    
+                    # Determine final signal (prioritize risk management)
+                    if risk_signal != 'HOLD':
+                        final_signal = risk_signal
+                        self.status = f"Risk management triggered: {risk_signal}"
+                        print(f"{datetime.now()}: {self.status}")
+                    elif ai_signal != 'HOLD' and self.trade_count < self.max_trades:
+                        final_signal = ai_signal
+                        self.status = f"AI signal: {ai_signal}"
+                        print(f"{datetime.now()}: {self.status}")
+                    else:
+                        final_signal = 'HOLD'
+                        # Reset status to RUNNING if no special status
+                        if not self.status.startswith("WOULD") and not self.status.startswith("Risk"):
+                            self.status = "RUNNING"
+                    
+                    # Execute trade if needed (just log for now)
+                    if final_signal != 'HOLD':
+                        print(f"{datetime.now()}: WOULD EXECUTE {final_signal} at ${current_price:.2f}")
+                        # For real trading, uncomment the next line:
+                        # self.execute_trade(final_signal, current_price)
+                
+                self.last_update = datetime.now()
+                time.sleep(INTERVAL)  # Check every 30 seconds in headless mode
+                
+            except Exception as e:
+                print(f"{datetime.now()}: Error in main loop: {e}")
+                time.sleep(10)  # Wait a bit before retrying
+
+def main():
+    """Main function to start the trading bot"""
+    # Check for headless mode argument
+    headless_mode = False
+    if len(sys.argv) > 1 and sys.argv[1] == '--headless':
+        headless_mode = True
+    
+    try:
+        bot = AITradingBot()
+        
+        if headless_mode:
+            bot.run_headless()
+        else:
+            # Check if running in terminal with curses support
+            try:
+                curses.wrapper(bot.run_curses)
+            except:
+                print("Curses not available, running in headless mode")
+                bot.run_headless()
+                
+    except KeyboardInterrupt:
+        print("\nBot stopped by user")
+    except Exception as e:
+        print(f"Error: {e}")
+
+if __name__ == "__main__":
+    main()

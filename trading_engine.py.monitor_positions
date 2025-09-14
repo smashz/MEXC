@@ -1,0 +1,66 @@
+    async def monitor_positions(self):
+        """Monitor open positions and manage stop-losses"""
+        while self._running and not self._stop_event.is_set():
+            try:
+                current_price = await self.client.get_current_price(self.config.trading_params.symbol)
+                
+                # Check each open position
+                closed_positions = []
+                for position_id, position in self.positions.items():
+                    entry_price = position['entry_price']
+                    stop_loss_price = position['stop_loss_price']
+                    quantity = position['quantity']
+                    side = position['side']
+                    
+                    # Calculate position P&L
+                    if side == 'BUY':
+                        profit_pct = ((current_price - entry_price) / entry_price) * 100
+                        triggered = current_price <= stop_loss_price
+                    else:  # SELL
+                        profit_pct = ((entry_price - current_price) / entry_price) * 100
+                        triggered = current_price >= stop_loss_price
+                    
+                    # Check for stop-loss trigger
+                    if triggered:
+                        logger.info(f"Stop-loss triggered for position {position_id} at {current_price}")
+                        if not self.config.dry_run:
+                            try:
+                                # Close position at market price
+                                close_side = 'SELL' if side == 'BUY' else 'BUY'
+                                await self.client.place_market_order(
+                                    symbol=self.config.trading_params.symbol,
+                                    side=close_side,
+                                    quantity=quantity
+                                )
+                                logger.info(f"Position {position_id} closed at market price")
+                            except Exception as e:
+                                logger.error(f"Failed to close position {position_id}: {str(e)}")
+                                continue
+                        
+                        # Update metrics
+                        self.total_profit += profit_pct * quantity * entry_price
+                        if profit_pct >= 0:
+                            self.win_count += 1
+                        else:
+                            self.loss_count += 1
+                            
+                        closed_positions.append(position_id)
+                
+                # Remove closed positions
+                for position_id in closed_positions:
+                    del self.positions[position_id]
+                
+                # Update UI if callback is set
+                if self.ui_update_callback:
+                    await self.ui_update_callback(current_price, {
+                        'positions': len(self.positions),
+                        'total_profit': self.total_profit,
+                        'win_count': self.win_count,
+                        'loss_count': self.loss_count
+                    })
+                    
+            except Exception as e:
+                logger.error(f"Error in position monitoring loop: {str(e)}")
+            
+            # Sleep briefly to avoid excessive API calls
+            await asyncio.sleep(1)

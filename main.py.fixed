@@ -1,0 +1,115 @@
+#!/usr/bin/env python3
+import asyncio
+import sys
+import os
+import curses
+import argparse
+from typing import Optional, Dict, Any, List
+from datetime import datetime
+from loguru import logger
+from config import load_config, BotConfig
+from mexc_client import MexcClient
+from trading_engine import TradingEngine
+
+# Constants for UI
+HEADER = "MEXC⚡ Trading Bot"
+STATUS_WINDOW_HEIGHT = 10
+ORDERS_WINDOW_HEIGHT = 8
+SIGNALS_WINDOW_HEIGHT = 6
+
+async def main():
+    args = parse_args()
+    config = load_config()
+    
+    # Override config with CLI args
+    if args.symbol:
+        config.trading_params.symbol = args.symbol
+    if args.amount:
+        config.trading_params.trade_amount = args.amount
+    if args.dry_run:
+        config.trading_params.dry_run = True
+    if args.headless:
+        config.headless = True
+        
+    if args.action == 'test-api':
+        await test_api()
+        return
+    
+    # Initialize components
+    client = None
+    trading_engine = None
+    ui = None
+    
+    MAX_RETRIES = 3
+    retry_count = 0
+    last_error = None
+    
+    while retry_count < MAX_RETRIES:
+        try:
+            # Clean up any existing instances
+            if client:
+                try:
+                    await client.close()
+                except:
+                    pass
+            
+            # Create fresh instances with timeouts
+            client = MexcClient(config.credentials, rate_limit_rps=config.rate_limit_requests_per_second)
+            
+            # Test API connection
+            logger.info("Testing API connection...")
+            await client.get_exchange_info()
+            
+            # Initialize trading engine with retry logic
+            logger.info("Initializing trading engine...")
+            trading_engine = TradingEngine(config, client)
+            ui = TradingBotUI(trading_engine, config.headless)
+            
+            async with client:
+                # Initialize trading engine
+                await trading_engine.initialize()
+                logger.info("Trading bot initialized successfully")
+                
+                if config.dry_run:
+                    logger.warning("Bot is running in DRY RUN mode - no real trades will be executed")
+                
+                # Start both components
+                await asyncio.gather(
+                    trading_engine.start(),
+                    ui.start() if ui else asyncio.sleep(0)
+                )
+                break  # Success
+                
+        except KeyboardInterrupt:
+            logger.info("Received shutdown signal, cleaning up...")
+            break
+            
+        except Exception as e:
+            last_error = e
+            retry_count += 1
+            logger.error(f"Error in main loop (attempt {retry_count}/{MAX_RETRIES}): {str(e)}")
+            
+            if retry_count < MAX_RETRIES:
+                logger.info(f"Retrying in 5 seconds...")
+                await asyncio.sleep(5)
+            
+        finally:
+            # Clean shutdown
+            if trading_engine:
+                await trading_engine.stop()
+            if ui:
+                await ui.stop()
+    
+    if retry_count >= MAX_RETRIES:
+        logger.error(f"Bot failed to start after {MAX_RETRIES} attempts")
+        logger.error(f"Last error: {str(last_error)}")
+        sys.exit(1)
+
+if __name__ == '__main__':
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("\nBot shutdown complete")
+    except Exception as e:
+        logger.error(f"Fatal error: {str(e)}")
+        sys.exit(1)

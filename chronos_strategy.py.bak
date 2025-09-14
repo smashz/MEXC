@@ -41,20 +41,21 @@ class ChronosTradingStrategy:
                 self._last_update = datetime.now()
         except Exception as e:
             logger.error(f"Error updating price data: {e}")
-    
+            # Don't add potentially invalid data
+        
     def predict(self) -> Dict[str, Any]:
         """Generate predictions using trend analysis"""
         try:
             if len(self.historical_prices) < self.lookback_periods:
-                logger.warning(f"Insufficient data: {len(self.historical_prices)}/{self.lookback_periods}")
+                logger.warning(f"Insufficient historical data. Need {self.lookback_periods} periods, have {len(self.historical_prices)}")
                 return {
                     'direction': 'NEUTRAL',
                     'confidence': 0.0,
                     'prediction': None,
                     'error': 'Insufficient data'
                 }
-            
-            # Calculate trend
+
+            # Calculate trend over lookback period
             recent_prices = self.historical_prices[-self.lookback_periods:]
             price_changes = np.diff(recent_prices)
             trend_strength = np.abs(np.mean(price_changes))
@@ -66,20 +67,20 @@ class ChronosTradingStrategy:
                     'prediction': None,
                     'trend_strength': trend_strength
                 }
-            
-            # Determine direction
+
+            # Determine trend direction
             trend_direction = 'UP' if np.mean(price_changes) > 0 else 'DOWN'
             confidence = min(trend_strength / self.min_trend_strength, 1.0)
             
-            # Calculate prediction
+            # Calculate predicted price
             current_price = self.historical_prices[-1]
             predicted_change = np.mean(price_changes) * self.prediction_length
             predicted_price = current_price + predicted_change
-            
+
             self.last_signal = trend_direction
             self.last_confidence = confidence
             self.last_prediction_time = datetime.now()
-            
+
             return {
                 'direction': trend_direction,
                 'confidence': confidence,
@@ -88,32 +89,109 @@ class ChronosTradingStrategy:
                 'timestamp': self.last_prediction_time.isoformat()
             }
         except Exception as e:
-            logger.error(f"Error in prediction: {e}")
+            logger.error(f"Error generating prediction: {e}")
             return {
                 'direction': 'NEUTRAL',
                 'confidence': 0.0,
                 'prediction': None,
                 'error': str(e)
             }
-    
-    def get_last_prediction(self) -> Dict[str, Any]:
-        """Get the last prediction"""
-        try:
-            if self.last_prediction_time is None or \
-               (datetime.now() - self.last_prediction_time).total_seconds() > self.config.ai_config.update_interval:
-                return self.predict()
+                    'prediction': None,
+                    'trend_strength': trend_strength
+                }
+
+            # Determine trend direction
+            trend_direction = 'UP' if np.mean(price_changes) > 0 else 'DOWN'
+            confidence = min(trend_strength / self.min_trend_strength, 1.0)
             
+            # Calculate predicted price
+            current_price = self.historical_prices[-1]
+            predicted_change = np.mean(price_changes) * self.prediction_length
+            predicted_price = current_price + predicted_change
+
+            self.last_signal = trend_direction
+            self.last_confidence = confidence
+            self.last_prediction_time = datetime.now()
+
             return {
-                'direction': self.last_signal,
-                'confidence': self.last_confidence,
-                'prediction': None,
+                'direction': trend_direction,
+                'confidence': confidence,
+                'prediction': predicted_price,
+                'trend_strength': trend_strength,
                 'timestamp': self.last_prediction_time.isoformat()
             }
-        except Exception as e:
-            logger.error(f"Error getting prediction: {e}")
             return {
-                'direction': 'NEUTRAL',
                 'confidence': 0.0,
-                'prediction': None,
-                'error': str(e)
+                'direction': 'NEUTRAL',
+                'prediction': None
             }
+            
+        try:
+            # Use simple trend analysis
+            current_price = self.historical_prices[-1]
+            prev_price = self.historical_prices[-2]
+            
+            # Calculate price change
+            price_change = (current_price - prev_price) / prev_price
+            
+            # Determine trend strength
+            confidence = min(0.8, abs(price_change) * 100)  # Cap confidence at 80%
+            
+            # Determine direction based on price change
+            if price_change > 0.001:  # 0.1% threshold for uptrend
+                direction = "UP"
+            elif price_change < -0.001:  # -0.1% threshold for downtrend
+                direction = "DOWN"
+            else:
+                direction = "NEUTRAL"
+                confidence = 0.0
+            
+            # Store prediction
+            self.last_prediction_time = datetime.now()
+            self.last_confidence = confidence
+            self.last_signal = direction
+            predicted_price = current_price * (1 + price_change)
+            self._price_predictions.append(predicted_price)
+            
+            return {
+                'confidence': confidence,
+                'direction': direction,
+                'prediction': predicted_price
+            }
+            
+        except Exception as e:
+            logger.error(f"Error in prediction: {e}")
+            return {
+                'confidence': 0.0,
+                'direction': 'NEUTRAL',
+                'prediction': None
+            }
+    
+    def generate_signal(self) -> str:
+        """Generate trading signal based on trend analysis"""
+        if len(self.historical_prices) < 2:
+            return "NEUTRAL"
+            
+        prediction = self.predict()
+        confidence = prediction['confidence']
+        direction = prediction['direction']
+        
+        if confidence < self.confidence_threshold:
+            return "NEUTRAL"
+            
+        if direction == "UP":
+            return "BUY"
+        elif direction == "DOWN":
+            return "SELL"
+        
+        return "NEUTRAL"
+    
+    def get_prediction_info(self) -> Dict[str, Any]:
+        """Get the latest prediction information"""
+        prediction = self.predict()
+        return {
+            'direction': prediction['direction'],
+            'confidence': prediction['confidence'],
+            'current_price': self.historical_prices[-1] if self.historical_prices else None,
+            'predicted_price': prediction['prediction']
+        }
