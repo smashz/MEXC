@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 import numpy as np
 from loguru import logger
 from config import load_config, BotConfig
+import logging_config
 
 class ChronosTradingStrategy:
     """Advanced trading strategy using trend analysis"""
@@ -45,14 +46,15 @@ class ChronosTradingStrategy:
     def predict(self) -> Dict[str, Any]:
         """Generate predictions using trend analysis"""
         try:
-            if len(self.historical_prices) < self.lookback_periods:
-                logger.warning(f"Insufficient data: {len(self.historical_prices)}/{self.lookback_periods}")
-                return {
-                    'direction': 'NEUTRAL',
-                    'confidence': 0.0,
-                    'prediction': None,
-                    'error': 'Insufficient data'
-                }
+            with logging_config.ai_context():
+                if len(self.historical_prices) < self.lookback_periods:
+                    logger.warning(f"Insufficient data: {len(self.historical_prices)}/{self.lookback_periods}")
+                    return {
+                        'direction': 'NEUTRAL',
+                        'confidence': 0.0,
+                        'prediction': None,
+                        'error': 'Insufficient data'
+                    }
             
             # Calculate trend
             recent_prices = self.historical_prices[-self.lookback_periods:]
@@ -88,13 +90,15 @@ class ChronosTradingStrategy:
                 'timestamp': self.last_prediction_time.isoformat()
             }
         except Exception as e:
-            logger.error(f"Error in prediction: {e}")
-            return {
+            error_info = {
                 'direction': 'NEUTRAL',
                 'confidence': 0.0,
                 'prediction': None,
-                'error': str(e)
+                'error': str(e),
+                'timestamp': datetime.now().isoformat()
             }
+            logger.error(f"AI Prediction error: {e}\nFull details: {error_info}")
+            return error_info
     
     def get_last_prediction(self) -> Dict[str, Any]:
         """Get the last prediction"""

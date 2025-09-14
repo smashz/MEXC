@@ -1,42 +1,86 @@
-# Set up logging configuration
-import sys
-from loguru import logger
+"""Logging configuration for the MEXC trading bot"""
 import os
+import sys
 from datetime import datetime
+from loguru import logger
 
-# Remove default logger
+# Remove any existing handlers
 logger.remove()
 
 # Create logs directory if it doesn't exist
-os.makedirs("logs", exist_ok=True)
+log_dir = "logs"
+os.makedirs(log_dir, exist_ok=True)
 
-# Get log level from environment or config
-log_level = os.getenv("LOG_LEVEL", "INFO").upper()
+# Set up file logging
+log_file = os.path.join(log_dir, f"MEXCL_{datetime.now().strftime('%Y-%m-%d')}.log")
 
-# Add console handler with color
-logger.add(
-    sys.stderr,
-    format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
-    level=log_level,
-    colorize=True
-)
+# Global UI instance for log capturing
+_ui_instance = None
 
-# Add file handler with rotation
-log_file = f"logs/MEXC_{datetime.now().strftime('%Y-%m-%d')}.log"
-logger.add(
-    log_file,
-    format="{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {name}:{function}:{line} - {message}",
-    rotation="1 day",
-    retention="30 days",
-    level="DEBUG",  # Always log debug to file
-    encoding="utf-8",
-    catch=True,  # Catch exceptions
-    backtrace=True,  # Include backtrace in error logs
-    diagnose=True,  # Include variable values in error logs
-    enqueue=True  # Thread-safe logging
-)
+def set_ui_instance(ui):
+    """Set the UI instance for log capturing"""
+    global _ui_instance
+    _ui_instance = ui
 
-# Log startup information
-logger.info("Starting MEXC Trading Bot")
-logger.info(f"Log Level: {log_level}")
-logger.info(f"Log File: {log_file}")
+def get_ui_instance():
+    """Get the UI instance for log capturing"""
+    return _ui_instance
+
+# Add a handler for UI log capturing
+def log_to_ui(message):
+    """Send log messages to the UI if available"""
+    if _ui_instance:
+        try:
+            # Ensure the message is converted to string and level is extracted properly
+            msg_str = str(message.record["message"])
+            level_name = message.record["level"].name
+            _ui_instance.add_log_message(msg_str, level_name)
+        except Exception as e:
+            # Don't use logger here to avoid potential recursion
+            print(f"Error sending log to UI: {e}", file=sys.stderr)
+
+"""Initialize Loguru logging with default format"""
+# Initialize with base configuration
+logger = logger.bind(component="SYSTEM")
+logger.remove()
+
+# Add a basic console handler for initialization
+logger.add(sys.stderr,
+          level="INFO",
+          format="{time:HH:mm:ss} | {level: <8} | {extra[component]: <10} | {message}")
+
+# Configure default context
+logger = logger.bind(component="SYSTEM")
+
+# Add file handler with enhanced format for AI logs
+logger.add(log_file, 
+          level="INFO",
+          rotation="1 day",
+          retention="14 days",
+          format="{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {extra[component]: <10} | {message}")
+
+# Add console handler with enhanced format
+logger.add(sys.stderr, 
+          level="INFO",
+          format="{time:HH:mm:ss} | {level: <8} | {extra[component]: <10} | {message}")
+
+# Add context manager for AI logs
+class ai_context:
+    def __enter__(self):
+        return logger.contextualize(component="AI")
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
+
+# Add context manager for UI logs
+class ui_context:
+    def __enter__(self):
+        return logger.contextualize(component="UI")
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
+
+# Add UI handler
+logger.add(log_to_ui, 
+          level="INFO",
+          format="{message}")

@@ -1,0 +1,14 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Add balance update method to trading_engine.py",
+			"type": "shell",
+			"command": "python3",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": ""
+		}
+	]
+}

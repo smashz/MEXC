@@ -18,13 +18,19 @@ class MexcClient:
     BASE_URL = "https://api.mexc.com"
     
     def __init__(self, credentials: MexcCredentials, rate_limit_rps: float = 10.0):
+        if not credentials.api_key or not credentials.secret_key:
+            raise ValueError("API key and secret key are required. Please check your .env file and ensure MEXC_API_KEY and MEXC_SECRET_KEY are set correctly.")
+        
         self.api_key = credentials.api_key
         self.secret_key = credentials.secret_key
+        self.passphrase = credentials.passphrase
         self.rate_limit_rps = rate_limit_rps
         self.session: Optional[aiohttp.ClientSession] = None
         self._last_request_time = 0
         self._request_count = 0
         self._rate_limit_lock = asyncio.Lock()
+        
+        logger.info("MEXC API client initialized successfully")
         
     async def __aenter__(self):
         """Async context manager entry"""
@@ -32,7 +38,73 @@ class MexcClient:
             timeout=aiohttp.ClientTimeout(total=30),
             connector=aiohttp.TCPConnector(limit=100, ttl_dns_cache=300)
         )
+        # Validate credentials by making a test API call
+        await self.validate_credentials()
         return self
+
+    async def validate_credentials(self):
+        """Validate API credentials by making a test API call"""
+        if not self.api_key or not self.secret_key:
+            raise ValueError("API key and secret key are required but missing. Please check your .env file.")
+            
+        try:
+            # Test API access by getting account info
+            info = await self.get_account()
+            if info is not None:
+                logger.info("API credentials validated successfully")
+                return True
+            else:
+                raise ValueError("Failed to validate API credentials")
+        except Exception as e:
+            logger.error(f"Failed to validate API credentials: {str(e)}")
+            raise
+            
+    async def get_account(self) -> Dict[str, Any]:
+        """Get account information including balances"""
+        if not self.session:
+            raise RuntimeError("API client session not initialized")
+            
+        endpoint = "/api/v3/account"
+        timestamp = int(time.time() * 1000)
+        params = {'timestamp': timestamp}
+        signature = self._generate_signature(urllib.parse.urlencode(params))
+        params['signature'] = signature
+        
+        headers = {
+            'X-MEXC-APIKEY': self.api_key,
+        }
+        
+        try:
+            async with self.session.get(
+                f"{self.BASE_URL}{endpoint}",
+                params=params,
+                headers=headers
+            ) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    logger.debug(f"Account info received: {data}")
+                    return data
+                else:
+                    logger.error(f"Failed to get account info: {response.status}")
+                    error_text = await response.text()
+                    logger.error(f"Error response: {error_text}")
+                    return None
+        except Exception as e:
+            logger.error(f"Error fetching account info: {str(e)}")
+            return None
+            
+        try:
+            # Try to get account information
+            await self.get_account_info()
+            logger.info("API credentials validated successfully")
+        except aiohttp.ClientResponseError as e:
+            if e.status == 401:
+                raise ValueError(f"Invalid API credentials: Authorization failed. Please check your MEXC_API_KEY and MEXC_SECRET_KEY in the .env file.")
+            else:
+                raise ValueError(f"API error (HTTP {e.status}): {str(e)}")
+        except Exception as e:
+            logger.error(f"Failed to validate API credentials: {str(e)}")
+            raise ValueError(f"API validation failed: {str(e)}. Please check your MEXC_API_KEY and MEXC_SECRET_KEY in the .env file.")
     
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         """Async context manager exit"""
@@ -46,6 +118,25 @@ class MexcClient:
             query_string.encode('utf-8'),
             hashlib.sha256
         ).hexdigest()
+
+    async def get_account_info(self) -> Dict[str, Any]:
+        """Get account information to validate API credentials"""
+        endpoint = "/api/v3/account"
+        timestamp = int(time.time() * 1000)
+        query_string = f"timestamp={timestamp}"
+        signature = self._generate_signature(query_string)
+        
+        headers = {
+            "X-MEXC-APIKEY": self.api_key,
+        }
+        
+        url = f"{self.BASE_URL}{endpoint}?{query_string}&signature={signature}"
+        
+        async with self.session.get(url, headers=headers) as response:
+            if response.status != 200:
+                text = await response.text()
+                raise ValueError(f"API request failed: {text}")
+            return await response.json()
 
     async def get_ticker_price(self, symbol: str) -> Dict[str, Any]:
         """Get current ticker price for a symbol"""

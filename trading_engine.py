@@ -40,6 +40,24 @@ class TradingEngine:
         self.win_count = 0
         self.loss_count = 0
         
+        # Balance tracking
+        self.balance_info = {
+            'USDT': {'free': 0.0, 'locked': 0.0},
+            'total_value': 0.0
+        }
+        
+    def update_balance_info(self, balances: List[Dict[str, str]]):
+        """Update balance information from account balances"""
+        for balance in balances:
+            asset = balance['asset']
+            if asset == 'USDT':
+                self.balance_info['USDT'] = {
+                    'free': float(balance['free']),
+                    'locked': float(balance['locked'])
+                }
+                self.balance_info['total_value'] = float(balance['free']) + float(balance['locked'])
+                break
+        
     async def reload_config(self):
         """Reload configuration from .env and reinitialize components"""
         from config import load_config
@@ -109,20 +127,32 @@ class TradingEngine:
             logger.debug(f"Standardized symbol: {raw_symbol} -> {self.config.trading_params.symbol}")
             
             # Ensure client is initialized
-            if not self.client or not self.client.session:
-                logger.error("API client not properly initialized")
-                return False
+            if not self.client:
+                raise ValueError("API client is missing")
+            if not self.client.session:
+                raise ValueError("API client session is not initialized. Make sure to use the client within an async context manager.")
                 
             logger.debug("Client and session are properly initialized")
                 
-            # Test API connection
-            logger.info("Testing API connection...")
+            # Test API connection and initialize components
+            logger.info("Testing API connection and initializing components...")
             try:
+                # Test API connection
                 await self.client.get_klines(
                     symbol=self.config.trading_params.symbol,
                     interval=self.config.ai_config.timeframe,
                     limit=1
                 )
+                
+                # Initialize chronos strategy
+                self.chronos = ChronosTradingStrategy(self.config)
+                
+                # Fetch initial balance
+                account_info = await self.client.get_account()
+                if account_info and 'balances' in account_info:
+                    # Update balance info
+                    self.update_balance_info(account_info['balances'])
+                
             except Exception as e:
                 logger.error(f"API connection test failed: {e}")
                 return False

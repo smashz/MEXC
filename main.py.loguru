@@ -1,0 +1,300 @@
+#!/usr/bin/env python3
+from typing import Optional, Dict, Any, List
+import argparse
+import curses
+import os
+import sys
+import time
+import asyncio
+from datetime import datetime
+from typing import Dict, Any
+from loguru import logger
+from config import load_config, BotConfig
+from mexc_client import MexcClient
+from trading_engine import TradingEngine
+
+# Constants for UI
+HEADER = "MEXC Trading Bot"
+MIN_TERMINAL_WIDTH = 80
+MIN_TERMINAL_HEIGHT = 24
+
+class TradingBotUI:
+    def __init__(self, engine: TradingEngine, headless: bool = False):
+        """Initialize the UI"""
+        try:
+            self.engine = engine
+            self.headless = headless
+            self.stdscr = None
+            self._running = False
+            self._curses_failed = False
+            self._retry_count = 0
+            self.MAX_RETRIES = 3
+            self._last_update = datetime.now()
+            self.status = "Initializing..."
+            self.paused = False
+            self._update_interval = getattr(engine.config.trading_params, 'ui_update_interval', 1.0)
+            self._last_check = {}  # Track last check times for different components
+            self._last_env_mtime = os.path.getmtime('.env')  # Track .env file modification time
+            self._env_check_interval = 1.0  # Check for .env changes every second
+            self._last_price = 0.0  # Track last price for minimal updates
+            self._last_status = ""  # Track last status for minimal updates
+            self._full_refresh_needed = True  # Flag for full screen refresh
+            self.last_prediction = None  # Track last prediction for change detection
+            self.session_start_balance = 0.0
+            self.session_current_balance = 0.0
+            self.session_start_time = datetime.now()
+        except Exception as e:
+            logger.error(f"Error initializing UI: {e}")
+            raise
+
+    def _format_minimal_status(self, current_price: float) -> str:
+        """Format the minimal status line for headless mode"""
+        try:
+            status = "PAUSED" if self.paused else self.status
+            mode = "DRY RUN" if self.engine.config.trading_params.dry_run else "LIVE"
+            return f"\rPrice: ${current_price:.4f} | Mode: {mode} | Status: {status}"
+        except Exception as e:
+            logger.error(f"Error formatting minimal status: {e}")
+            return f"\rPrice: ${current_price:.4f}"
+
+    def _format_prediction_info(self, prediction_info: Dict[str, Any]) -> str:
+        """Format prediction info for display"""
+        try:
+            if not prediction_info:
+                return ""
+            direction = prediction_info.get('direction', 'NEUTRAL')
+            confidence = prediction_info.get('confidence', 0.0)
+            trend = "^" if direction == "BUY" else "v" if direction == "SELL" else "-"
+            return f"\nAI Prediction: [{trend}]\nSignal: {direction}\nConfidence: {confidence*100:.1f}%"
+        except Exception as e:
+            logger.error(f"Error formatting prediction: {e}")
+            return ""
+
+    def _format_balance_info(self) -> str:
+        """Format balance info for display"""
+        try:
+            if self.session_start_balance <= 0:
+                return "Balance: Initializing..."
+                
+            session_pnl = self.session_current_balance - self.session_start_balance
+            pnl_percent = (session_pnl / self.session_start_balance) * 100
+            return f"Balance: ${self.session_current_balance:.2f}\nP/L: ${session_pnl:+.2f} ({pnl_percent:+.2f}%)"
+        except Exception as e:
+            logger.error(f"Error formatting balance: {e}")
+            return "Balance: Error"
+
+    async def _print_headless_status(self, current_price: float, prediction_info: Dict[str, Any]):
+        """Display status in headless mode"""
+        try:
+            # For minimal updates, just show the status line
+            if not self._full_refresh_needed:
+                print(self._format_minimal_status(current_price), end="", flush=True)
+                return
+
+            # Full refresh starts with clearing the screen
+            print("\033[2J\033[H", end="", flush=True)
+            
+            # Build the full display
+            lines = [
+                "MEXC AI Trading Bot (Headless Mode)",
+                "=" * 50,
+                "",
+                f"Status: {'|| ' if self.paused else '> '}{self.paused and 'PAUSED' or self.status}",
+                f"Last Update: {self._last_update.strftime('%H:%M:%S')}",
+                "",
+                f"Mode: {'DRY RUN' if self.engine.config.trading_params.dry_run else 'LIVE TRADING'}",
+                f"Symbol: {self.engine.config.trading_params.symbol}",
+                f"Current Price: ${current_price:.4f}",
+                "",
+                self._format_balance_info(),
+            ]
+            
+            # Add prediction info if available
+            if prediction_info:
+                lines.append(self._format_prediction_info(prediction_info))
+            
+            # Add footer
+            lines.extend([
+                "",
+                "Press Ctrl+C to stop the bot",
+                "=" * 50
+            ])
+            
+            # Print all lines
+            print("\n".join(lines))
+            
+        except Exception as e:
+            logger.error(f"Error in headless display: {e}")
+            # Fallback to minimal status line
+            try:
+                print(self._format_minimal_status(current_price), end="", flush=True)
+            except Exception as e2:
+                logger.error(f"Failed to display fallback status: {e2}")
+
+    async def _get_prediction_info(self) -> Dict[str, Any]:
+        """Get the latest prediction information"""
+        prediction_info = {}
+        try:
+            if hasattr(self.engine, 'chronos'):
+                prediction_info = self.engine.chronos.get_last_prediction()
+                # Detect changes
+                if prediction_info != self.last_prediction:
+                    self._full_refresh_needed = True
+                    self.last_prediction = prediction_info
+        except Exception as e:
+            logger.error(f"Error getting prediction info: {e}")
+        return prediction_info
+
+    async def _check_config_changes(self) -> bool:
+        """Check if the config needs to be reloaded"""
+        try:
+            current_mtime = os.path.getmtime('.env')
+            if current_mtime != self._last_env_mtime:
+                logger.info("Config file changed, reloading...")
+                self._last_env_mtime = current_mtime
+                self._full_refresh_needed = True
+                return True
+            return False
+        except Exception as e:
+            logger.error(f"Error checking config changes: {e}")
+            return False
+
+    async def start(self):
+        """Start the UI loop"""
+        self._running = True
+        startup_timeout = 60  # 60 seconds timeout for initial startup
+        
+        try:
+            logger.info("Initializing trading engine...")
+            async with asyncio.timeout(startup_timeout):
+                if not await self.engine.initialize():
+                    raise Exception("Failed to initialize trading engine")
+                logger.info("Trading engine initialized successfully")
+                
+            while self._running:
+                try:
+                    # Get and validate current price
+                    current_price = await self.engine.get_current_price(self.engine.config.trading_params.symbol)
+                    
+                    if current_price and current_price > 0:
+                        logger.debug(f"Got current price: {current_price}")
+                        self.engine.last_price = current_price
+                        self._last_values['price'] = current_price
+                        
+                        # Check if we need a full refresh in headless mode
+                        price_changed = abs(current_price - self._last_price) > 0.0001
+                        status_changed = self.status != self._last_status
+                        self._full_refresh_needed = price_changed or status_changed or self._full_refresh_needed
+                    else:
+                        current_price = self._last_values.get('price', 0)
+                        if not getattr(self, '_last_price_warning', False):
+                            logger.warning("No price data available or invalid price")
+                            logger.info(f"Engine state: last_price={getattr(self.engine, 'last_price', 'N/A')}")
+                            logger.info(f"Symbol: {self.engine.config.trading_params.symbol}")
+                            self._last_price_warning = True
+                    
+                    # Get prediction info
+                    prediction_info = await self._get_prediction_info()
+                    
+                    # Update the display
+                    await self._print_headless_status(current_price, prediction_info)
+                    
+                    # Update tracking variables after successful update
+                    self._last_price = current_price
+                    self._last_status = self.status
+                    self._last_update = datetime.now()
+                    
+                    # Clear full refresh flag after successful update
+                    self._full_refresh_needed = False
+                    
+                    # Sleep for the update interval
+                    await asyncio.sleep(self._update_interval)
+                    
+                except Exception as e:
+                    logger.error(f"Error in main loop: {e}")
+                    await asyncio.sleep(1)  # Sleep on error to avoid tight loop
+                    
+        except asyncio.TimeoutError:
+            logger.error(f"Engine initialization timed out after {startup_timeout} seconds")
+        except KeyboardInterrupt:
+            logger.info("Received keyboard interrupt, shutting down...")
+        except Exception as e:
+            logger.error(f"Fatal error in UI: {e}")
+        finally:
+            self._running = False
+            await self.stop()
+
+    async def stop(self):
+        """Stop the UI"""
+        self._running = False
+        if hasattr(self.engine, 'stop'):
+            try:
+                await self.engine.stop()
+            except Exception as e:
+                logger.error(f"Error stopping engine: {e}")
+
+def parse_args():
+    parser = argparse.ArgumentParser(description='MEXC Trading Bot')
+    parser.add_argument('--action', type=str, choices=['start', 'test-api'], default='start', help='Bot action')
+    parser.add_argument('--symbol', type=str, help='Trading pair symbol (e.g., BTC_USDT). If not provided, uses value from .env')
+    parser.add_argument('--amount', type=float, help='Trading amount in USDT. If not provided, uses value from .env')
+    parser.add_argument('--dry-run', action='store_true', help='Run in dry-run mode (no real trades)')
+    parser.add_argument('--headless', action='store_true', help='Run without UI (logs only)')
+    return parser.parse_args()
+
+async def main():
+    try:
+        args = parse_args()
+        logger.debug("Command line arguments: {}", args)
+        
+        # Load configuration
+        config = load_config()
+        logger.debug("Configuration loaded from .env")
+        
+        # Override config with CLI args if provided
+        if args.symbol:
+            logger.warning("Command-line symbol argument overriding .env setting: {}", args.symbol)
+            config.trading_params.symbol = args.symbol
+            
+        if args.amount:
+            logger.warning("Command-line amount argument overriding .env setting: {}", args.amount)
+            config.trading_params.trade_amount = args.amount
+            
+        if args.dry_run:
+            logger.warning("Command-line dry-run flag overriding .env setting")
+            config.trading_params.dry_run = True
+            
+        if args.headless:
+            logger.info("Running in headless mode")
+            config.headless = True
+            
+        # Initialize components
+        client = MexcClient(config.credentials)
+        trading_engine = TradingEngine(config, client)
+        ui = TradingBotUI(trading_engine, config.headless)
+        
+        # Start the UI
+        try:
+            await ui.start()
+        except KeyboardInterrupt:
+            logger.info("Received shutdown signal")
+        except Exception as e:
+            logger.error(f"Error running UI: {e}")
+        finally:
+            await ui.stop()
+            
+    except Exception as e:
+        logger.error(f"Fatal error: {e}")
+        sys.exit(1)
+
+if __name__ == '__main__':
+    if sys.platform == "win32":
+        os.environ['PYTHONIOENCODING'] = 'utf-8'
+    
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("\nBot shutdown complete")
+    except Exception as e:
+        logger.error(f"Fatal error: {str(e)}")
+        sys.exit(1)

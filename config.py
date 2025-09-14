@@ -72,20 +72,21 @@ def load_config() -> BotConfig:
     
     # Load credentials
     credentials = MexcCredentials(
-        api_key=os.getenv("API_KEY", ""),
-        secret_key=os.getenv("API_SECRET", "")
+        api_key=os.getenv("MEXC_API_KEY", ""),
+        secret_key=os.getenv("MEXC_SECRET_KEY", ""),
+        passphrase=os.getenv("MEXC_PASSPHRASE", None)
     )
     
     # Load trading params
     trading_params = TradingParams(
-        symbol=os.getenv("SYMBOL", "BTC_USDT"),
+        symbol=os.getenv("TRADING_SYMBOL", "BTC_USDT"),
         timeframe=os.getenv("TIMEFRAME", "5m"),
         leverage=int(os.getenv("LEVERAGE", "1")),
         dry_run=os.getenv("DRY_RUN", "true").lower() == "true",
-        trade_amount=float(os.getenv("TRADE_AMOUNT", "10.0")),
+        trade_amount=float(os.getenv("TRADING_QUANTITY", "10.0")),
         max_orders_per_day=int(os.getenv("MAX_ORDERS_PER_DAY", "10")),
-        stop_loss_pct=float(os.getenv("STOP_LOSS_PCT", "2.0")),
-        take_profit_pct=float(os.getenv("TAKE_PROFIT_PCT", "3.0"))
+        stop_loss_pct=float(os.getenv("STOP_LOSS_PERCENTAGE", "2.0")),
+        take_profit_pct=float(os.getenv("TAKE_PROFIT_PERCENTAGE", "3.0"))
     )
     
     # Load AI config

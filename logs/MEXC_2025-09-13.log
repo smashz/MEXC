@@ -4990,3 +4990,1697 @@
 2025-09-13 21:46:25 | DEBUG    | __main__:start:627 - Got current price: 3.1058
 2025-09-13 21:46:25 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
 2025-09-13 21:46:26 | DEBUG    | mexc_client:get_account_balance:261 - Retrieved balances for 7 assets
+2025-09-13 21:49:33 | INFO     | logging_config:<module>:40 - Starting MEXC Trading Bot
+2025-09-13 21:49:33 | INFO     | logging_config:<module>:41 - Log Level: INFO
+2025-09-13 21:49:33 | INFO     | logging_config:<module>:42 - Log File: logs/MEXC_2025-09-13.log
+2025-09-13 21:49:33 | DEBUG    | __main__:main:762 - Command line arguments: Namespace(action='start', symbol=None, amount=None, dry_run=False, headless=False)
+2025-09-13 21:49:33 | DEBUG    | __main__:main:766 - Configuration loaded from .env
+2025-09-13 21:49:33 | INFO     | __main__:main:787 - Active configuration:
+2025-09-13 21:49:33 | INFO     | __main__:main:788 -   Symbol: XRP_USDT
+2025-09-13 21:49:33 | INFO     | __main__:main:789 -   Trade Amount: 0.001
+2025-09-13 21:49:33 | INFO     | __main__:main:790 -   Mode: DRY RUN
+2025-09-13 21:49:33 | DEBUG    | __main__:main:792 - Final configuration: {'trading_params': {'symbol': 'XRP_USDT', 'timeframe': '5m', 'leverage': 1, 'dry_run': True, 'trade_amount': 0.001, 'max_orders_per_day': 10, 'stop_loss_pct': 2.0, 'take_profit_pct': 3.0}, 'trading_windows': [{'start': '09:30', 'end': '16:30', 'enabled': True, 'timezone': 'UTC'}], 'ai_config': {'model_path': 'amazon/chronos-t5-small', 'prediction_length': 12, 'lookback_periods': 24, 'max_historical_data': 1000, 'confidence_threshold': 0.65, 'min_trend_strength': 0.4, 'update_interval': 300, 'feature_columns': ['close', 'volume', 'high', 'low'], 'target_column': 'close', 'timeframe': '5m'}, 'risk_config': {'max_drawdown_pct': 15.0, 'risk_per_trade_pct': 1.0, 'position_sizing': 'dynamic'}, 'log_level': 'INFO', 'headless': False, 'rate_limit_requests_per_second': 10.0, 'track_metrics': True, 'save_predictions': True}
+2025-09-13 21:49:33 | INFO     | trading_engine:initialize:103 - Initializing trading engine...
+2025-09-13 21:49:33 | DEBUG    | trading_engine:initialize:109 - Standardized symbol: XRP_USDT -> XRPUSDT
+2025-09-13 21:49:33 | DEBUG    | trading_engine:initialize:116 - Client and session are properly initialized
+2025-09-13 21:49:33 | INFO     | trading_engine:initialize:119 - Testing API connection...
+2025-09-13 21:49:33 | DEBUG    | mexc_client:get_klines:112 - Fetching klines for XRPUSDT [5m] with limit 1
+2025-09-13 21:49:33 | DEBUG    | mexc_client:get_klines:114 - Full URL: https://api.mexc.com/api/v3/klines
+2025-09-13 21:49:33 | DEBUG    | mexc_client:get_klines:115 - Request params: {'symbol': 'XRPUSDT', 'interval': '5m', 'limit': 1}
+2025-09-13 21:49:33 | DEBUG    | mexc_client:get_klines:123 - Response status: 200
+2025-09-13 21:49:33 | DEBUG    | mexc_client:get_klines:124 - Raw response: [[1757814300000,"3.1039","3.1128","3.1021","3.1094","118701.12",1757814600000,"368965.3375"]]...
+2025-09-13 21:49:33 | INFO     | mexc_client:get_klines:152 - Successfully fetched 1 klines
+2025-09-13 21:49:33 | INFO     | trading_engine:_fetch_historical_data:230 - Fetching historical data (attempt 1/3)...
+2025-09-13 21:49:33 | DEBUG    | mexc_client:get_klines:112 - Fetching klines for XRPUSDT [5m] with limit 1000
+2025-09-13 21:49:33 | DEBUG    | mexc_client:get_klines:114 - Full URL: https://api.mexc.com/api/v3/klines
+2025-09-13 21:49:33 | DEBUG    | mexc_client:get_klines:115 - Request params: {'symbol': 'XRPUSDT', 'interval': '5m', 'limit': 1000}
+2025-09-13 21:49:34 | DEBUG    | mexc_client:get_klines:123 - Response status: 200
+2025-09-13 21:49:34 | DEBUG    | mexc_client:get_klines:124 - Raw response: [[1757664600000,"3.0614","3.0614","3.0568","3.0571","118333.08",1757664900000,"362034.3313"],[1757664900000,"3.0571","3.0572","3.0477","3.0518","171013.32",1757665200000,"521701.4595"],[1757665200000,...
+2025-09-13 21:49:34 | INFO     | mexc_client:get_klines:152 - Successfully fetched 500 klines
+2025-09-13 21:49:34 | INFO     | trading_engine:_fetch_historical_data:243 - Received 500 historical price points
+2025-09-13 21:49:34 | INFO     | trading_engine:initialize:136 - Trading engine initialized successfully
+2025-09-13 21:49:34 | INFO     | __main__:main:821 - Trading bot initialized successfully
+2025-09-13 21:49:34 | WARNING  | __main__:main:824 - Bot is running in DRY RUN mode - no real trades will be executed
+2025-09-13 21:49:34 | INFO     | __main__:start:605 - Initializing trading engine...
+2025-09-13 21:49:34 | INFO     | trading_engine:initialize:103 - Initializing trading engine...
+2025-09-13 21:49:34 | DEBUG    | trading_engine:initialize:109 - Standardized symbol: XRPUSDT -> XRPUSDT
+2025-09-13 21:49:34 | DEBUG    | trading_engine:initialize:116 - Client and session are properly initialized
+2025-09-13 21:49:34 | INFO     | trading_engine:initialize:119 - Testing API connection...
+2025-09-13 21:49:34 | DEBUG    | mexc_client:get_klines:112 - Fetching klines for XRPUSDT [5m] with limit 1
+2025-09-13 21:49:34 | DEBUG    | mexc_client:get_klines:114 - Full URL: https://api.mexc.com/api/v3/klines
+2025-09-13 21:49:34 | DEBUG    | mexc_client:get_klines:115 - Request params: {'symbol': 'XRPUSDT', 'interval': '5m', 'limit': 1}
+2025-09-13 21:49:34 | DEBUG    | trading_engine:update_strategy:377 - Fetching current price for XRPUSDT
+2025-09-13 21:49:34 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:49:34 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:49:34 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:49:34 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:49:34 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1093"}...
+2025-09-13 21:49:34 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1093'}
+2025-09-13 21:49:34 | DEBUG    | trading_engine:update_strategy:380 - Received ticker response: {'symbol': 'XRPUSDT', 'price': '3.1093'}
+2025-09-13 21:49:34 | DEBUG    | trading_engine:update_strategy:383 - Parsed current price: 3.1093
+2025-09-13 21:49:34 | ERROR    | trading_engine:update_strategy:417 - Error updating strategy: 'BotConfig' object has no attribute 'dry_run'
+2025-09-13 21:49:34 | ERROR    | __main__:_get_strategy_state:724 - Error getting strategy state: 'MexcClient' object has no attribute 'get_latest_price'
+2025-09-13 21:49:34 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:49:34 | DEBUG    | mexc_client:get_klines:123 - Response status: 200
+2025-09-13 21:49:34 | DEBUG    | mexc_client:get_klines:124 - Raw response: [[1757814300000,"3.1039","3.1128","3.1021","3.1094","118701.12",1757814600000,"368965.3375"]]...
+2025-09-13 21:49:34 | INFO     | mexc_client:get_klines:152 - Successfully fetched 1 klines
+2025-09-13 21:49:34 | INFO     | trading_engine:_fetch_historical_data:230 - Fetching historical data (attempt 1/3)...
+2025-09-13 21:49:34 | DEBUG    | mexc_client:get_klines:112 - Fetching klines for XRPUSDT [5m] with limit 1000
+2025-09-13 21:49:34 | DEBUG    | mexc_client:get_klines:114 - Full URL: https://api.mexc.com/api/v3/klines
+2025-09-13 21:49:34 | DEBUG    | mexc_client:get_klines:115 - Request params: {'symbol': 'XRPUSDT', 'interval': '5m', 'limit': 1000}
+2025-09-13 21:49:34 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:34 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:34 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:34 | DEBUG    | mexc_client:get_klines:123 - Response status: 200
+2025-09-13 21:49:34 | DEBUG    | mexc_client:get_klines:124 - Raw response: [[1757664600000,"3.0614","3.0614","3.0568","3.0571","118333.08",1757664900000,"362034.3313"],[1757664900000,"3.0571","3.0572","3.0477","3.0518","171013.32",1757665200000,"521701.4595"],[1757665200000,...
+2025-09-13 21:49:34 | INFO     | mexc_client:get_klines:152 - Successfully fetched 500 klines
+2025-09-13 21:49:34 | INFO     | trading_engine:_fetch_historical_data:243 - Received 500 historical price points
+2025-09-13 21:49:34 | INFO     | trading_engine:initialize:136 - Trading engine initialized successfully
+2025-09-13 21:49:34 | INFO     | __main__:start:609 - Trading engine initialized successfully
+2025-09-13 21:49:34 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:49:34 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:49:34 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:49:34 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:49:34 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1093"}...
+2025-09-13 21:49:34 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1093'}
+2025-09-13 21:49:34 | DEBUG    | __main__:start:627 - Got current price: 3.1093
+2025-09-13 21:49:34 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:49:34 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:34 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:34 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:35 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:49:35 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:49:35 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:49:35 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:49:35 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1093"}...
+2025-09-13 21:49:35 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1093'}
+2025-09-13 21:49:35 | DEBUG    | __main__:start:627 - Got current price: 3.1093
+2025-09-13 21:49:35 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:49:35 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:35 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:35 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:36 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:49:36 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:49:36 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:49:36 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:49:36 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1091"}...
+2025-09-13 21:49:36 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1091'}
+2025-09-13 21:49:36 | DEBUG    | __main__:start:627 - Got current price: 3.1091
+2025-09-13 21:49:36 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:49:37 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:37 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:37 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:38 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:49:38 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:49:38 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:49:38 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:49:38 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1091"}...
+2025-09-13 21:49:38 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1091'}
+2025-09-13 21:49:38 | DEBUG    | __main__:start:627 - Got current price: 3.1091
+2025-09-13 21:49:38 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:49:38 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:38 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:38 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:39 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:49:39 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:49:39 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:49:39 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:49:39 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1091"}...
+2025-09-13 21:49:39 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1091'}
+2025-09-13 21:49:39 | DEBUG    | __main__:start:627 - Got current price: 3.1091
+2025-09-13 21:49:39 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:49:39 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:39 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:39 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:40 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:49:40 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:49:40 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:49:40 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:49:40 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1091"}...
+2025-09-13 21:49:40 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1091'}
+2025-09-13 21:49:40 | DEBUG    | __main__:start:627 - Got current price: 3.1091
+2025-09-13 21:49:40 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:49:41 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:41 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:41 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:42 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:49:42 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:49:42 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:49:42 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:49:42 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.11"}...
+2025-09-13 21:49:42 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.11'}
+2025-09-13 21:49:42 | DEBUG    | __main__:start:627 - Got current price: 3.11
+2025-09-13 21:49:42 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:49:42 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:42 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:42 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:43 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:49:43 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:49:43 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:49:43 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:49:43 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.11"}...
+2025-09-13 21:49:43 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.11'}
+2025-09-13 21:49:43 | DEBUG    | __main__:start:627 - Got current price: 3.11
+2025-09-13 21:49:43 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:49:43 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:43 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:43 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:44 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:49:44 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:49:44 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:49:44 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:49:44 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1097"}...
+2025-09-13 21:49:44 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1097'}
+2025-09-13 21:49:44 | DEBUG    | __main__:start:627 - Got current price: 3.1097
+2025-09-13 21:49:44 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:49:44 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:44 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:44 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:45 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:49:45 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:49:45 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:49:45 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:49:45 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1097"}...
+2025-09-13 21:49:45 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1097'}
+2025-09-13 21:49:45 | DEBUG    | __main__:start:627 - Got current price: 3.1097
+2025-09-13 21:49:45 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:49:46 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:46 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:46 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:47 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:49:47 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:49:47 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:49:47 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:49:47 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1099"}...
+2025-09-13 21:49:47 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1099'}
+2025-09-13 21:49:47 | DEBUG    | __main__:start:627 - Got current price: 3.1099
+2025-09-13 21:49:47 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:49:47 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:47 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:47 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:48 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:49:48 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:49:48 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:49:48 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:49:48 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1097"}...
+2025-09-13 21:49:48 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1097'}
+2025-09-13 21:49:48 | DEBUG    | __main__:start:627 - Got current price: 3.1097
+2025-09-13 21:49:48 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:49:48 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:48 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:48 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:49 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:49:49 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:49:49 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:49:49 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:49:49 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1097"}...
+2025-09-13 21:49:49 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1097'}
+2025-09-13 21:49:49 | DEBUG    | __main__:start:627 - Got current price: 3.1097
+2025-09-13 21:49:49 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:49:49 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:49 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:49 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:50 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:49:50 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:49:50 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:49:50 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:49:50 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1091"}...
+2025-09-13 21:49:50 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1091'}
+2025-09-13 21:49:50 | DEBUG    | __main__:start:627 - Got current price: 3.1091
+2025-09-13 21:49:50 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:49:50 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:50 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:50 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:51 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:49:51 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:49:51 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:49:51 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:49:51 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1091"}...
+2025-09-13 21:49:51 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1091'}
+2025-09-13 21:49:51 | DEBUG    | __main__:start:627 - Got current price: 3.1091
+2025-09-13 21:49:51 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:49:52 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:52 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:52 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:53 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:49:53 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:49:53 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:49:53 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:49:53 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1091"}...
+2025-09-13 21:49:53 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1091'}
+2025-09-13 21:49:53 | DEBUG    | __main__:start:627 - Got current price: 3.1091
+2025-09-13 21:49:53 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:49:53 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:53 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:53 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:54 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:49:54 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:49:54 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:49:54 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:49:54 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1089"}...
+2025-09-13 21:49:54 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1089'}
+2025-09-13 21:49:54 | DEBUG    | __main__:start:627 - Got current price: 3.1089
+2025-09-13 21:49:54 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:49:54 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:54 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:54 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:55 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:49:55 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:49:55 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:49:55 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:49:55 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1089"}...
+2025-09-13 21:49:55 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1089'}
+2025-09-13 21:49:55 | DEBUG    | __main__:start:627 - Got current price: 3.1089
+2025-09-13 21:49:55 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:49:55 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:55 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:55 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:56 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:49:56 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:49:56 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:49:56 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:49:56 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1089"}...
+2025-09-13 21:49:56 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1089'}
+2025-09-13 21:49:56 | DEBUG    | __main__:start:627 - Got current price: 3.1089
+2025-09-13 21:49:56 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:49:57 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:57 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:57 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:58 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:49:58 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:49:58 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:49:58 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:49:58 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1089"}...
+2025-09-13 21:49:58 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1089'}
+2025-09-13 21:49:58 | DEBUG    | __main__:start:627 - Got current price: 3.1089
+2025-09-13 21:49:58 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:49:58 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:58 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:58 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:59 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:49:59 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:49:59 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:49:59 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:49:59 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1089"}...
+2025-09-13 21:49:59 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1089'}
+2025-09-13 21:49:59 | DEBUG    | __main__:start:627 - Got current price: 3.1089
+2025-09-13 21:49:59 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:49:59 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:59 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:49:59 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:00 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:00 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:00 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:00 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:00 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1083"}...
+2025-09-13 21:50:00 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1083'}
+2025-09-13 21:50:00 | DEBUG    | __main__:start:627 - Got current price: 3.1083
+2025-09-13 21:50:00 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:00 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:00 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:00 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:01 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:01 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:01 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:01 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:01 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1083"}...
+2025-09-13 21:50:01 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1083'}
+2025-09-13 21:50:01 | DEBUG    | __main__:start:627 - Got current price: 3.1083
+2025-09-13 21:50:01 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:02 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:02 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:02 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:03 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:03 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:03 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:03 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:03 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1085"}...
+2025-09-13 21:50:03 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1085'}
+2025-09-13 21:50:03 | DEBUG    | __main__:start:627 - Got current price: 3.1085
+2025-09-13 21:50:03 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:03 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:03 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:03 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:04 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:04 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:04 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:04 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:04 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1085"}...
+2025-09-13 21:50:04 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1085'}
+2025-09-13 21:50:04 | DEBUG    | __main__:start:627 - Got current price: 3.1085
+2025-09-13 21:50:04 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:04 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:04 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:04 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:05 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:05 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:05 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:05 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:05 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1083"}...
+2025-09-13 21:50:05 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1083'}
+2025-09-13 21:50:05 | DEBUG    | __main__:start:627 - Got current price: 3.1083
+2025-09-13 21:50:05 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:05 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:05 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:05 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:06 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:06 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:06 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:06 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:06 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1091"}...
+2025-09-13 21:50:06 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1091'}
+2025-09-13 21:50:06 | DEBUG    | __main__:start:627 - Got current price: 3.1091
+2025-09-13 21:50:06 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:06 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:06 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:06 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:07 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:07 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:07 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:07 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:07 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1091"}...
+2025-09-13 21:50:07 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1091'}
+2025-09-13 21:50:07 | DEBUG    | __main__:start:627 - Got current price: 3.1091
+2025-09-13 21:50:07 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:08 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:08 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:08 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:09 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:09 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:09 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:09 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:09 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1087"}...
+2025-09-13 21:50:09 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1087'}
+2025-09-13 21:50:09 | DEBUG    | __main__:start:627 - Got current price: 3.1087
+2025-09-13 21:50:09 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:09 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:09 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:09 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:10 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:10 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:10 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:10 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:10 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1087"}...
+2025-09-13 21:50:10 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1087'}
+2025-09-13 21:50:10 | DEBUG    | __main__:start:627 - Got current price: 3.1087
+2025-09-13 21:50:10 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:10 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:10 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:10 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:11 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:11 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:11 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:11 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:11 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1084"}...
+2025-09-13 21:50:11 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1084'}
+2025-09-13 21:50:11 | DEBUG    | __main__:start:627 - Got current price: 3.1084
+2025-09-13 21:50:11 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:11 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:11 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:11 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:12 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:12 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:12 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:12 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:12 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1084"}...
+2025-09-13 21:50:12 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1084'}
+2025-09-13 21:50:12 | DEBUG    | __main__:start:627 - Got current price: 3.1084
+2025-09-13 21:50:12 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:13 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:13 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:13 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:14 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:14 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:14 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:14 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:14 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1084"}...
+2025-09-13 21:50:14 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1084'}
+2025-09-13 21:50:14 | DEBUG    | __main__:start:627 - Got current price: 3.1084
+2025-09-13 21:50:14 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:14 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:14 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:14 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:15 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:15 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:15 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:15 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:15 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1084"}...
+2025-09-13 21:50:15 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1084'}
+2025-09-13 21:50:15 | DEBUG    | __main__:start:627 - Got current price: 3.1084
+2025-09-13 21:50:15 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:15 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:15 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:15 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:16 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:16 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:16 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:16 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:16 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.109"}...
+2025-09-13 21:50:16 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.109'}
+2025-09-13 21:50:16 | DEBUG    | __main__:start:627 - Got current price: 3.109
+2025-09-13 21:50:16 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:16 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:16 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:16 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:17 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:17 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:17 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:17 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:17 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.109"}...
+2025-09-13 21:50:17 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.109'}
+2025-09-13 21:50:17 | DEBUG    | __main__:start:627 - Got current price: 3.109
+2025-09-13 21:50:17 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:18 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:18 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:18 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:19 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:19 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:19 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:19 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:19 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1094"}...
+2025-09-13 21:50:19 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1094'}
+2025-09-13 21:50:19 | DEBUG    | __main__:start:627 - Got current price: 3.1094
+2025-09-13 21:50:19 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:19 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:19 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:19 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:20 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:20 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:20 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:20 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:20 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1094"}...
+2025-09-13 21:50:20 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1094'}
+2025-09-13 21:50:20 | DEBUG    | __main__:start:627 - Got current price: 3.1094
+2025-09-13 21:50:20 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:20 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:20 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:20 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:21 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:21 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:21 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:21 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:21 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1094"}...
+2025-09-13 21:50:21 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1094'}
+2025-09-13 21:50:21 | DEBUG    | __main__:start:627 - Got current price: 3.1094
+2025-09-13 21:50:21 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:21 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:21 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:21 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:22 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:22 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:22 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:22 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:22 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1094"}...
+2025-09-13 21:50:22 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1094'}
+2025-09-13 21:50:22 | DEBUG    | __main__:start:627 - Got current price: 3.1094
+2025-09-13 21:50:22 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:22 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:22 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:22 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:23 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:23 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:23 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:23 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:23 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1096"}...
+2025-09-13 21:50:23 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1096'}
+2025-09-13 21:50:23 | DEBUG    | __main__:start:627 - Got current price: 3.1096
+2025-09-13 21:50:23 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:24 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:24 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:24 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:25 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:25 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:25 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:25 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:25 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1095"}...
+2025-09-13 21:50:25 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1095'}
+2025-09-13 21:50:25 | DEBUG    | __main__:start:627 - Got current price: 3.1095
+2025-09-13 21:50:25 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:25 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:25 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:25 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:26 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:26 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:26 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:26 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:26 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1095"}...
+2025-09-13 21:50:26 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1095'}
+2025-09-13 21:50:26 | DEBUG    | __main__:start:627 - Got current price: 3.1095
+2025-09-13 21:50:26 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:26 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:26 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:26 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:27 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:27 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:27 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:27 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:27 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1094"}...
+2025-09-13 21:50:27 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1094'}
+2025-09-13 21:50:27 | DEBUG    | __main__:start:627 - Got current price: 3.1094
+2025-09-13 21:50:27 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:27 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:27 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:27 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:28 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:28 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:28 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:28 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:28 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1094"}...
+2025-09-13 21:50:28 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1094'}
+2025-09-13 21:50:28 | DEBUG    | __main__:start:627 - Got current price: 3.1094
+2025-09-13 21:50:28 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:29 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:29 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:29 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:30 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:30 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:30 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:30 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:30 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1093"}...
+2025-09-13 21:50:30 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1093'}
+2025-09-13 21:50:30 | DEBUG    | __main__:start:627 - Got current price: 3.1093
+2025-09-13 21:50:30 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:30 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:30 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:30 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:31 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:31 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:31 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:31 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:31 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1093"}...
+2025-09-13 21:50:31 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1093'}
+2025-09-13 21:50:31 | DEBUG    | __main__:start:627 - Got current price: 3.1093
+2025-09-13 21:50:31 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:31 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:31 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:31 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:32 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:32 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:32 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:32 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:32 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1096"}...
+2025-09-13 21:50:32 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1096'}
+2025-09-13 21:50:32 | DEBUG    | __main__:start:627 - Got current price: 3.1096
+2025-09-13 21:50:32 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:32 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:32 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:32 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:33 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:33 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:33 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:33 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:33 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1096"}...
+2025-09-13 21:50:33 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1096'}
+2025-09-13 21:50:33 | DEBUG    | __main__:start:627 - Got current price: 3.1096
+2025-09-13 21:50:33 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:33 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:33 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:33 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:34 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:34 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:34 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:34 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:34 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.11"}...
+2025-09-13 21:50:34 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.11'}
+2025-09-13 21:50:34 | DEBUG    | __main__:start:627 - Got current price: 3.11
+2025-09-13 21:50:34 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:35 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:35 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:35 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:36 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:36 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:36 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:36 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:36 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1103"}...
+2025-09-13 21:50:36 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1103'}
+2025-09-13 21:50:36 | DEBUG    | __main__:start:627 - Got current price: 3.1103
+2025-09-13 21:50:36 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:36 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:36 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:36 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:37 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:37 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:37 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:37 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:37 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1103"}...
+2025-09-13 21:50:37 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1103'}
+2025-09-13 21:50:37 | DEBUG    | __main__:start:627 - Got current price: 3.1103
+2025-09-13 21:50:37 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:37 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:37 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:37 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:38 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:38 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:38 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:38 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:38 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1103"}...
+2025-09-13 21:50:38 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1103'}
+2025-09-13 21:50:38 | DEBUG    | __main__:start:627 - Got current price: 3.1103
+2025-09-13 21:50:38 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:38 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:38 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:38 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:39 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:39 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:39 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:39 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:39 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1103"}...
+2025-09-13 21:50:39 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1103'}
+2025-09-13 21:50:39 | DEBUG    | __main__:start:627 - Got current price: 3.1103
+2025-09-13 21:50:39 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:40 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:40 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:40 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:41 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:41 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:41 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:41 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:41 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1103"}...
+2025-09-13 21:50:41 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1103'}
+2025-09-13 21:50:41 | DEBUG    | __main__:start:627 - Got current price: 3.1103
+2025-09-13 21:50:41 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:41 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:41 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:41 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:42 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:42 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:42 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:42 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:42 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1113"}...
+2025-09-13 21:50:42 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1113'}
+2025-09-13 21:50:42 | DEBUG    | __main__:start:627 - Got current price: 3.1113
+2025-09-13 21:50:42 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:42 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:42 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:42 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:43 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:43 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:43 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:43 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:43 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1111"}...
+2025-09-13 21:50:43 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1111'}
+2025-09-13 21:50:43 | DEBUG    | __main__:start:627 - Got current price: 3.1111
+2025-09-13 21:50:43 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:44 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:44 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:44 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:45 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:45 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:45 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:45 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:45 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1111"}...
+2025-09-13 21:50:45 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1111'}
+2025-09-13 21:50:45 | DEBUG    | __main__:start:627 - Got current price: 3.1111
+2025-09-13 21:50:45 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:45 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:45 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:45 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:46 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:46 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:46 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:46 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:46 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1111"}...
+2025-09-13 21:50:46 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1111'}
+2025-09-13 21:50:46 | DEBUG    | __main__:start:627 - Got current price: 3.1111
+2025-09-13 21:50:46 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:46 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:46 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:46 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:47 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:47 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:47 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:47 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:47 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1111"}...
+2025-09-13 21:50:47 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1111'}
+2025-09-13 21:50:47 | DEBUG    | __main__:start:627 - Got current price: 3.1111
+2025-09-13 21:50:47 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:48 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:48 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:48 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:49 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:49 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:49 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:49 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:49 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1116"}...
+2025-09-13 21:50:49 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1116'}
+2025-09-13 21:50:49 | DEBUG    | __main__:start:627 - Got current price: 3.1116
+2025-09-13 21:50:49 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:49 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:49 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:49 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:50 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:50 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:50 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:50 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:50 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1116"}...
+2025-09-13 21:50:50 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1116'}
+2025-09-13 21:50:50 | DEBUG    | __main__:start:627 - Got current price: 3.1116
+2025-09-13 21:50:50 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:50 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:50 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:50 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:51 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:51 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:51 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:51 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:51 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1119"}...
+2025-09-13 21:50:51 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1119'}
+2025-09-13 21:50:51 | DEBUG    | __main__:start:627 - Got current price: 3.1119
+2025-09-13 21:50:51 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:51 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:51 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:51 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:52 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:52 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:52 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:52 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:52 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1119"}...
+2025-09-13 21:50:52 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1119'}
+2025-09-13 21:50:52 | DEBUG    | __main__:start:627 - Got current price: 3.1119
+2025-09-13 21:50:52 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:53 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:53 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:53 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:54 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:54 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:54 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:54 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:54 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.112"}...
+2025-09-13 21:50:54 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.112'}
+2025-09-13 21:50:54 | DEBUG    | __main__:start:627 - Got current price: 3.112
+2025-09-13 21:50:54 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:54 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:54 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:54 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:55 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:55 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:55 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:55 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:55 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.112"}...
+2025-09-13 21:50:55 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.112'}
+2025-09-13 21:50:55 | DEBUG    | __main__:start:627 - Got current price: 3.112
+2025-09-13 21:50:55 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:55 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:55 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:55 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:56 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:56 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:56 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:56 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:56 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1118"}...
+2025-09-13 21:50:56 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1118'}
+2025-09-13 21:50:56 | DEBUG    | __main__:start:627 - Got current price: 3.1118
+2025-09-13 21:50:56 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:56 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:56 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:56 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:57 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:57 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:57 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:57 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:57 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1123"}...
+2025-09-13 21:50:57 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1123'}
+2025-09-13 21:50:57 | DEBUG    | __main__:start:627 - Got current price: 3.1123
+2025-09-13 21:50:57 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:58 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:58 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:58 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:59 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:50:59 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:50:59 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:50:59 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:50:59 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1124"}...
+2025-09-13 21:50:59 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1124'}
+2025-09-13 21:50:59 | DEBUG    | __main__:start:627 - Got current price: 3.1124
+2025-09-13 21:50:59 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:50:59 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:59 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:50:59 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:00 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:00 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:00 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:00 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:00 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1124"}...
+2025-09-13 21:51:00 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1124'}
+2025-09-13 21:51:00 | DEBUG    | __main__:start:627 - Got current price: 3.1124
+2025-09-13 21:51:00 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:00 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:00 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:00 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:01 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:01 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:01 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:01 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:01 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1124"}...
+2025-09-13 21:51:01 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1124'}
+2025-09-13 21:51:01 | DEBUG    | __main__:start:627 - Got current price: 3.1124
+2025-09-13 21:51:01 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:01 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:01 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:01 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:02 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:02 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:02 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:02 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:02 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1133"}...
+2025-09-13 21:51:02 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1133'}
+2025-09-13 21:51:02 | DEBUG    | __main__:start:627 - Got current price: 3.1133
+2025-09-13 21:51:02 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:03 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:03 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:03 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:04 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:04 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:04 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:04 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:04 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1133"}...
+2025-09-13 21:51:04 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1133'}
+2025-09-13 21:51:04 | DEBUG    | __main__:start:627 - Got current price: 3.1133
+2025-09-13 21:51:04 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:04 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:04 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:04 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:05 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:05 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:05 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:05 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:05 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1133"}...
+2025-09-13 21:51:05 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1133'}
+2025-09-13 21:51:05 | DEBUG    | __main__:start:627 - Got current price: 3.1133
+2025-09-13 21:51:05 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:05 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:05 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:05 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:06 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:06 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:06 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:06 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:06 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1133"}...
+2025-09-13 21:51:06 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1133'}
+2025-09-13 21:51:06 | DEBUG    | __main__:start:627 - Got current price: 3.1133
+2025-09-13 21:51:06 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:06 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:06 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:06 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:07 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:07 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:07 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:07 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:07 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1133"}...
+2025-09-13 21:51:07 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1133'}
+2025-09-13 21:51:07 | DEBUG    | __main__:start:627 - Got current price: 3.1133
+2025-09-13 21:51:07 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:08 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:08 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:08 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:09 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:09 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:09 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:09 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:09 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.113"}...
+2025-09-13 21:51:09 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.113'}
+2025-09-13 21:51:09 | DEBUG    | __main__:start:627 - Got current price: 3.113
+2025-09-13 21:51:09 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:09 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:09 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:09 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:10 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:10 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:10 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:10 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:10 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.113"}...
+2025-09-13 21:51:10 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.113'}
+2025-09-13 21:51:10 | DEBUG    | __main__:start:627 - Got current price: 3.113
+2025-09-13 21:51:10 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:10 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:10 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:10 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:11 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:11 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:11 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:11 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:11 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.113"}...
+2025-09-13 21:51:11 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.113'}
+2025-09-13 21:51:11 | DEBUG    | __main__:start:627 - Got current price: 3.113
+2025-09-13 21:51:11 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:11 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:11 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:11 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:12 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:12 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:12 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:12 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:12 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.113"}...
+2025-09-13 21:51:12 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.113'}
+2025-09-13 21:51:12 | DEBUG    | __main__:start:627 - Got current price: 3.113
+2025-09-13 21:51:12 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:13 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:13 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:13 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:14 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:14 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:14 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:14 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:14 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.113"}...
+2025-09-13 21:51:14 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.113'}
+2025-09-13 21:51:14 | DEBUG    | __main__:start:627 - Got current price: 3.113
+2025-09-13 21:51:14 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:14 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:14 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:14 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:15 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:15 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:15 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:15 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:15 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.113"}...
+2025-09-13 21:51:15 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.113'}
+2025-09-13 21:51:15 | DEBUG    | __main__:start:627 - Got current price: 3.113
+2025-09-13 21:51:15 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:15 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:15 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:15 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:16 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:16 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:16 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:16 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:16 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.113"}...
+2025-09-13 21:51:16 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.113'}
+2025-09-13 21:51:16 | DEBUG    | __main__:start:627 - Got current price: 3.113
+2025-09-13 21:51:16 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:16 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:16 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:16 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:17 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:17 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:17 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:17 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:17 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1132"}...
+2025-09-13 21:51:17 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1132'}
+2025-09-13 21:51:17 | DEBUG    | __main__:start:627 - Got current price: 3.1132
+2025-09-13 21:51:17 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:18 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:18 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:18 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:19 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:19 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:19 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:19 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:19 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1126"}...
+2025-09-13 21:51:19 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1126'}
+2025-09-13 21:51:19 | DEBUG    | __main__:start:627 - Got current price: 3.1126
+2025-09-13 21:51:19 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:19 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:19 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:19 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:20 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:20 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:20 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:20 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:20 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1124"}...
+2025-09-13 21:51:20 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1124'}
+2025-09-13 21:51:20 | DEBUG    | __main__:start:627 - Got current price: 3.1124
+2025-09-13 21:51:20 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:20 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:20 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:20 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:21 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:21 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:21 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:21 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:21 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1124"}...
+2025-09-13 21:51:21 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1124'}
+2025-09-13 21:51:21 | DEBUG    | __main__:start:627 - Got current price: 3.1124
+2025-09-13 21:51:21 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:21 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:21 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:21 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:22 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:22 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:22 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:22 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:22 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.112"}...
+2025-09-13 21:51:22 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.112'}
+2025-09-13 21:51:22 | DEBUG    | __main__:start:627 - Got current price: 3.112
+2025-09-13 21:51:22 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:23 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:23 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:23 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:24 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:24 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:24 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:24 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:24 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.112"}...
+2025-09-13 21:51:24 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.112'}
+2025-09-13 21:51:24 | DEBUG    | __main__:start:627 - Got current price: 3.112
+2025-09-13 21:51:24 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:24 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:24 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:24 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:25 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:25 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:25 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:25 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:25 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1122"}...
+2025-09-13 21:51:25 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1122'}
+2025-09-13 21:51:25 | DEBUG    | __main__:start:627 - Got current price: 3.1122
+2025-09-13 21:51:25 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:25 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:25 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:25 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:26 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:26 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:26 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:26 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:26 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.113"}...
+2025-09-13 21:51:26 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.113'}
+2025-09-13 21:51:26 | DEBUG    | __main__:start:627 - Got current price: 3.113
+2025-09-13 21:51:26 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:27 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:27 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:27 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:28 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:28 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:28 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:28 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:28 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.113"}...
+2025-09-13 21:51:28 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.113'}
+2025-09-13 21:51:28 | DEBUG    | __main__:start:627 - Got current price: 3.113
+2025-09-13 21:51:28 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:28 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:28 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:28 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:29 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:29 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:29 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:29 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:29 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.113"}...
+2025-09-13 21:51:29 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.113'}
+2025-09-13 21:51:29 | DEBUG    | __main__:start:627 - Got current price: 3.113
+2025-09-13 21:51:29 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:29 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:29 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:29 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:30 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:30 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:30 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:30 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:30 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.113"}...
+2025-09-13 21:51:30 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.113'}
+2025-09-13 21:51:30 | DEBUG    | __main__:start:627 - Got current price: 3.113
+2025-09-13 21:51:30 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:31 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:31 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:31 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:32 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:32 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:32 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:32 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:32 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1136"}...
+2025-09-13 21:51:32 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1136'}
+2025-09-13 21:51:32 | DEBUG    | __main__:start:627 - Got current price: 3.1136
+2025-09-13 21:51:32 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:32 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:32 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:32 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:33 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:33 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:33 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:33 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:33 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1136"}...
+2025-09-13 21:51:33 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1136'}
+2025-09-13 21:51:33 | DEBUG    | __main__:start:627 - Got current price: 3.1136
+2025-09-13 21:51:33 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:33 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:33 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:33 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:34 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:34 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:34 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:34 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:34 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.114"}...
+2025-09-13 21:51:34 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.114'}
+2025-09-13 21:51:34 | DEBUG    | __main__:start:627 - Got current price: 3.114
+2025-09-13 21:51:34 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:34 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:34 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:34 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:35 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:35 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:35 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:35 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:35 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.114"}...
+2025-09-13 21:51:35 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.114'}
+2025-09-13 21:51:35 | DEBUG    | __main__:start:627 - Got current price: 3.114
+2025-09-13 21:51:35 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:36 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:36 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:36 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:37 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:37 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:37 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:37 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:37 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1144"}...
+2025-09-13 21:51:37 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1144'}
+2025-09-13 21:51:37 | DEBUG    | __main__:start:627 - Got current price: 3.1144
+2025-09-13 21:51:37 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:37 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:37 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:37 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:38 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:38 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:38 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:38 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:38 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1144"}...
+2025-09-13 21:51:38 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1144'}
+2025-09-13 21:51:38 | DEBUG    | __main__:start:627 - Got current price: 3.1144
+2025-09-13 21:51:38 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:38 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:38 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:38 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:39 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:39 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:39 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:39 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:39 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1144"}...
+2025-09-13 21:51:39 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1144'}
+2025-09-13 21:51:39 | DEBUG    | __main__:start:627 - Got current price: 3.1144
+2025-09-13 21:51:39 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:39 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:39 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:39 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:40 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:40 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:40 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:40 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:40 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1143"}...
+2025-09-13 21:51:40 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1143'}
+2025-09-13 21:51:40 | DEBUG    | __main__:start:627 - Got current price: 3.1143
+2025-09-13 21:51:40 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:41 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:41 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:41 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:42 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:42 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:42 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:42 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:42 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1142"}...
+2025-09-13 21:51:42 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1142'}
+2025-09-13 21:51:42 | DEBUG    | __main__:start:627 - Got current price: 3.1142
+2025-09-13 21:51:42 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:42 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:42 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:42 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:43 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:43 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:43 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:43 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:43 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1142"}...
+2025-09-13 21:51:43 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1142'}
+2025-09-13 21:51:43 | DEBUG    | __main__:start:627 - Got current price: 3.1142
+2025-09-13 21:51:43 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:43 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:43 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:43 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:44 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:44 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:44 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:44 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:44 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1142"}...
+2025-09-13 21:51:44 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1142'}
+2025-09-13 21:51:44 | DEBUG    | __main__:start:627 - Got current price: 3.1142
+2025-09-13 21:51:44 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:45 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:45 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:45 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:46 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:46 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:46 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:46 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:46 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1141"}...
+2025-09-13 21:51:46 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1141'}
+2025-09-13 21:51:46 | DEBUG    | __main__:start:627 - Got current price: 3.1141
+2025-09-13 21:51:46 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:46 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:46 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:46 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:47 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:47 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:47 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:47 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:47 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1145"}...
+2025-09-13 21:51:47 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1145'}
+2025-09-13 21:51:47 | DEBUG    | __main__:start:627 - Got current price: 3.1145
+2025-09-13 21:51:47 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:47 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:47 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:47 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:48 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:48 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:48 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:48 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:48 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1145"}...
+2025-09-13 21:51:48 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1145'}
+2025-09-13 21:51:48 | DEBUG    | __main__:start:627 - Got current price: 3.1145
+2025-09-13 21:51:48 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:48 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:48 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:48 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:49 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:49 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:49 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:49 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:49 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1145"}...
+2025-09-13 21:51:49 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1145'}
+2025-09-13 21:51:49 | DEBUG    | __main__:start:627 - Got current price: 3.1145
+2025-09-13 21:51:49 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:50 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:50 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:50 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:51 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:51 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:51 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:51 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:51 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1163"}...
+2025-09-13 21:51:51 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1163'}
+2025-09-13 21:51:51 | DEBUG    | __main__:start:627 - Got current price: 3.1163
+2025-09-13 21:51:51 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:51 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:51 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:51 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:52 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:52 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:52 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:52 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:52 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1163"}...
+2025-09-13 21:51:52 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1163'}
+2025-09-13 21:51:52 | DEBUG    | __main__:start:627 - Got current price: 3.1163
+2025-09-13 21:51:52 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:52 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:52 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:52 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:53 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:53 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:53 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:53 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:53 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1163"}...
+2025-09-13 21:51:53 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1163'}
+2025-09-13 21:51:53 | DEBUG    | __main__:start:627 - Got current price: 3.1163
+2025-09-13 21:51:53 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:54 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:54 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:54 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:55 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:55 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:55 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:55 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:55 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1161"}...
+2025-09-13 21:51:55 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1161'}
+2025-09-13 21:51:55 | DEBUG    | __main__:start:627 - Got current price: 3.1161
+2025-09-13 21:51:55 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:55 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:55 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:55 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:56 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:56 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:56 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:56 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:56 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1161"}...
+2025-09-13 21:51:56 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1161'}
+2025-09-13 21:51:56 | DEBUG    | __main__:start:627 - Got current price: 3.1161
+2025-09-13 21:51:56 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:56 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:56 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:56 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:57 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:57 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:57 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:57 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:57 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1162"}...
+2025-09-13 21:51:57 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1162'}
+2025-09-13 21:51:57 | DEBUG    | __main__:start:627 - Got current price: 3.1162
+2025-09-13 21:51:57 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:57 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:57 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:57 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:58 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:51:58 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:51:58 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:51:58 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:51:58 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1162"}...
+2025-09-13 21:51:58 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1162'}
+2025-09-13 21:51:58 | DEBUG    | __main__:start:627 - Got current price: 3.1162
+2025-09-13 21:51:58 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:51:59 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:59 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:51:59 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:00 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:52:00 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:52:00 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:52:00 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:52:00 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1162"}...
+2025-09-13 21:52:00 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1162'}
+2025-09-13 21:52:00 | DEBUG    | __main__:start:627 - Got current price: 3.1162
+2025-09-13 21:52:00 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:52:00 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:00 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:00 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:01 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:52:01 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:52:01 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:52:01 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:52:01 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1162"}...
+2025-09-13 21:52:01 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1162'}
+2025-09-13 21:52:01 | DEBUG    | __main__:start:627 - Got current price: 3.1162
+2025-09-13 21:52:01 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:52:01 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:01 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:01 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:02 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:52:02 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:52:02 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:52:02 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:52:02 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1162"}...
+2025-09-13 21:52:02 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1162'}
+2025-09-13 21:52:02 | DEBUG    | __main__:start:627 - Got current price: 3.1162
+2025-09-13 21:52:02 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:52:02 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:02 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:02 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:03 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:52:03 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:52:03 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:52:03 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:52:03 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1159"}...
+2025-09-13 21:52:03 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1159'}
+2025-09-13 21:52:03 | DEBUG    | __main__:start:627 - Got current price: 3.1159
+2025-09-13 21:52:03 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:52:04 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:04 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:04 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:04 | INFO     | __main__:_check_config_changes:415 - Detected .env file changes, reloading configuration...
+2025-09-13 21:52:04 | INFO     | trading_engine:reload_config:84 - Configuration updated, symbol unchanged: XRPUSDT
+2025-09-13 21:52:04 | INFO     | __main__:_check_config_changes:432 - Configuration reloaded successfully
+2025-09-13 21:52:04 | INFO     | __main__:_run_strategy_updates:70 - Configuration updated, refreshing UI...
+2025-09-13 21:52:04 | ERROR    | __main__:_get_strategy_state:724 - Error getting strategy state: 'MexcClient' object has no attribute 'get_latest_price'
+2025-09-13 21:52:04 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:52:04 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:04 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:04 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:04 | DEBUG    | trading_engine:update_strategy:377 - Fetching current price for XRPUSDT
+2025-09-13 21:52:04 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:52:04 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:52:04 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:52:04 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:52:04 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1161"}...
+2025-09-13 21:52:04 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1161'}
+2025-09-13 21:52:04 | DEBUG    | trading_engine:update_strategy:380 - Received ticker response: {'symbol': 'XRPUSDT', 'price': '3.1161'}
+2025-09-13 21:52:04 | DEBUG    | trading_engine:update_strategy:383 - Parsed current price: 3.1161
+2025-09-13 21:52:04 | ERROR    | trading_engine:update_strategy:417 - Error updating strategy: 'BotConfig' object has no attribute 'dry_run'
+2025-09-13 21:52:04 | ERROR    | __main__:_get_strategy_state:724 - Error getting strategy state: 'MexcClient' object has no attribute 'get_latest_price'
+2025-09-13 21:52:04 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:52:04 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:04 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:04 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:05 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:52:05 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:52:05 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:52:05 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:52:05 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1159"}...
+2025-09-13 21:52:05 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1159'}
+2025-09-13 21:52:05 | DEBUG    | __main__:start:627 - Got current price: 3.1159
+2025-09-13 21:52:05 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:52:05 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:05 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:05 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:06 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:52:06 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:52:06 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:52:06 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:52:06 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1159"}...
+2025-09-13 21:52:06 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1159'}
+2025-09-13 21:52:06 | DEBUG    | __main__:start:627 - Got current price: 3.1159
+2025-09-13 21:52:06 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:52:06 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:06 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:06 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:07 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:52:07 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:52:07 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:52:07 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:52:07 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1159"}...
+2025-09-13 21:52:07 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1159'}
+2025-09-13 21:52:07 | DEBUG    | __main__:start:627 - Got current price: 3.1159
+2025-09-13 21:52:07 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:52:08 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:08 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:08 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:09 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:52:09 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:52:09 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:52:09 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:52:09 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1158"}...
+2025-09-13 21:52:09 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1158'}
+2025-09-13 21:52:09 | DEBUG    | __main__:start:627 - Got current price: 3.1158
+2025-09-13 21:52:09 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:52:09 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:09 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:09 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:10 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:52:10 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:52:10 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:52:10 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:52:10 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1158"}...
+2025-09-13 21:52:10 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1158'}
+2025-09-13 21:52:10 | DEBUG    | __main__:start:627 - Got current price: 3.1158
+2025-09-13 21:52:10 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:52:10 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:10 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:10 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:11 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:52:11 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:52:11 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:52:11 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:52:11 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1158"}...
+2025-09-13 21:52:11 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1158'}
+2025-09-13 21:52:11 | DEBUG    | __main__:start:627 - Got current price: 3.1158
+2025-09-13 21:52:11 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:52:12 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:12 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:12 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:13 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:52:13 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:52:13 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:52:13 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:52:13 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1166"}...
+2025-09-13 21:52:13 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1166'}
+2025-09-13 21:52:13 | DEBUG    | __main__:start:627 - Got current price: 3.1166
+2025-09-13 21:52:13 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:52:13 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:13 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:13 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:14 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:52:14 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:52:14 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:52:14 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:52:14 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1166"}...
+2025-09-13 21:52:14 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1166'}
+2025-09-13 21:52:14 | DEBUG    | __main__:start:627 - Got current price: 3.1166
+2025-09-13 21:52:14 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:52:14 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:14 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:14 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:15 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:52:15 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:52:15 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:52:15 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:52:15 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1166"}...
+2025-09-13 21:52:15 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1166'}
+2025-09-13 21:52:15 | DEBUG    | __main__:start:627 - Got current price: 3.1166
+2025-09-13 21:52:15 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:52:15 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:15 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:15 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:16 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:52:16 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:52:16 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:52:16 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:52:16 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1174"}...
+2025-09-13 21:52:16 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1174'}
+2025-09-13 21:52:16 | DEBUG    | __main__:start:627 - Got current price: 3.1174
+2025-09-13 21:52:16 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:52:17 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:17 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:17 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:18 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:52:18 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:52:18 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:52:18 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:52:18 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1174"}...
+2025-09-13 21:52:18 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1174'}
+2025-09-13 21:52:18 | DEBUG    | __main__:start:627 - Got current price: 3.1174
+2025-09-13 21:52:18 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:52:18 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:18 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:18 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:19 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:52:19 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:52:19 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:52:19 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:52:19 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1174"}...
+2025-09-13 21:52:19 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1174'}
+2025-09-13 21:52:19 | DEBUG    | __main__:start:627 - Got current price: 3.1174
+2025-09-13 21:52:19 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:52:19 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:19 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:19 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:20 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:52:20 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:52:20 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:52:20 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:52:20 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1174"}...
+2025-09-13 21:52:20 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1174'}
+2025-09-13 21:52:20 | DEBUG    | __main__:start:627 - Got current price: 3.1174
+2025-09-13 21:52:20 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:52:21 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:21 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:21 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:22 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:52:22 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:52:22 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:52:22 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:52:22 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.117"}...
+2025-09-13 21:52:22 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.117'}
+2025-09-13 21:52:22 | DEBUG    | __main__:start:627 - Got current price: 3.117
+2025-09-13 21:52:22 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:52:22 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:22 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:22 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:23 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:52:23 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:52:23 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:52:23 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:52:23 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.117"}...
+2025-09-13 21:52:23 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.117'}
+2025-09-13 21:52:23 | DEBUG    | __main__:start:627 - Got current price: 3.117
+2025-09-13 21:52:23 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:52:23 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:23 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:23 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:24 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:52:24 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:52:24 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:52:24 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:52:24 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1169"}...
+2025-09-13 21:52:24 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1169'}
+2025-09-13 21:52:24 | DEBUG    | __main__:start:627 - Got current price: 3.1169
+2025-09-13 21:52:24 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:52:24 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:24 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:24 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:25 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:52:25 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:52:25 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:52:25 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:52:25 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1169"}...
+2025-09-13 21:52:25 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1169'}
+2025-09-13 21:52:25 | DEBUG    | __main__:start:627 - Got current price: 3.1169
+2025-09-13 21:52:25 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:52:26 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:26 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:26 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:27 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:52:27 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:52:27 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:52:27 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:52:27 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1169"}...
+2025-09-13 21:52:27 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1169'}
+2025-09-13 21:52:27 | DEBUG    | __main__:start:627 - Got current price: 3.1169
+2025-09-13 21:52:27 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:52:27 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:27 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:27 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:28 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:52:28 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:52:28 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:52:28 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:52:28 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1167"}...
+2025-09-13 21:52:28 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1167'}
+2025-09-13 21:52:28 | DEBUG    | __main__:start:627 - Got current price: 3.1167
+2025-09-13 21:52:28 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:52:28 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:28 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:28 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:29 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:52:29 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:52:29 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:52:29 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:52:29 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1167"}...
+2025-09-13 21:52:29 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1167'}
+2025-09-13 21:52:29 | DEBUG    | __main__:start:627 - Got current price: 3.1167
+2025-09-13 21:52:29 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:52:29 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:29 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:29 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:30 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:52:30 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:52:30 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:52:30 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:52:30 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1167"}...
+2025-09-13 21:52:30 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1167'}
+2025-09-13 21:52:30 | DEBUG    | __main__:start:627 - Got current price: 3.1167
+2025-09-13 21:52:30 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:52:31 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:31 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:31 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:32 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:52:32 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:52:32 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:52:32 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:52:32 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1168"}...
+2025-09-13 21:52:32 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1168'}
+2025-09-13 21:52:32 | DEBUG    | __main__:start:627 - Got current price: 3.1168
+2025-09-13 21:52:32 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:52:32 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:32 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:32 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:33 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:52:33 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:52:33 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:52:33 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:52:33 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1168"}...
+2025-09-13 21:52:33 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1168'}
+2025-09-13 21:52:33 | DEBUG    | __main__:start:627 - Got current price: 3.1168
+2025-09-13 21:52:33 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:52:33 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:33 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:33 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:34 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:52:34 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:52:34 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:52:34 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:52:34 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1168"}...
+2025-09-13 21:52:34 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1168'}
+2025-09-13 21:52:34 | DEBUG    | __main__:start:627 - Got current price: 3.1168
+2025-09-13 21:52:34 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:52:35 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:35 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:35 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:36 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:52:36 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:52:36 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:52:36 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:52:36 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1167"}...
+2025-09-13 21:52:36 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1167'}
+2025-09-13 21:52:36 | DEBUG    | __main__:start:627 - Got current price: 3.1167
+2025-09-13 21:52:36 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
+2025-09-13 21:52:36 | ERROR    | mexc_client:_make_request:223 - API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:36 | ERROR    | mexc_client:_make_request:237 - Request failed: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:36 | ERROR    | mexc_client:get_account_balance:265 - Error fetching account balances: MEXC API Error 400: {"code":400,"msg":"api key required"}
+2025-09-13 21:52:37 | DEBUG    | mexc_client:get_ticker_price:62 - Fetching ticker price for XRPUSDT
+2025-09-13 21:52:37 | DEBUG    | mexc_client:get_ticker_price:64 - Full URL: https://api.mexc.com/api/v3/ticker/price
+2025-09-13 21:52:37 | DEBUG    | mexc_client:get_ticker_price:65 - Request params: {'symbol': 'XRPUSDT'}
+2025-09-13 21:52:37 | DEBUG    | mexc_client:get_ticker_price:73 - Response status: 200
+2025-09-13 21:52:37 | DEBUG    | mexc_client:get_ticker_price:74 - Raw response: {"symbol":"XRPUSDT","price":"3.1172"}...
+2025-09-13 21:52:37 | DEBUG    | mexc_client:get_ticker_price:82 - Parsed ticker response: {'symbol': 'XRPUSDT', 'price': '3.1172'}
+2025-09-13 21:52:37 | DEBUG    | __main__:start:627 - Got current price: 3.1172
+2025-09-13 21:52:37 | DEBUG    | mexc_client:_make_request:216 - Making GET request to /api/v3/account
